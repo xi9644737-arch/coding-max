@@ -68,7 +68,7 @@ description: 根因修复引擎。触发:修bug/定位/报错/修复/验证/debu
 
 ## 记忆文件
 
-`BUG_PATTERNS.md` | `PROJECT_PROFILE.md` | `bugs/` | `.resume.md` | `PHASE.json`(`idle→bootstrapping→testing→done`)
+`BUG_PATTERNS.md` | `PROJECT_PROFILE.md` | `bugs/` | `.resume.md`(启动读→跳已完成→继续→删) | `PHASE.json`(`idle→bootstrapping→testing→done`)
 
 ## 参考
 

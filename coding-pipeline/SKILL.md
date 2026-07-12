@@ -51,9 +51,11 @@ coding-max步骤8无测试→`PHASE.json(state:bootstrapping)`→本skill→`sta
 
 无已有CI→生成 `.github/workflows/test.yml`(默认)/`.gitlab-ci.yml`(用户指定)。Monorepo→每子包独立job。含: 版本矩阵、lock文件缓存(`actions/cache@v4`)、Phase1→2依赖(`needs`)、Codecov step、Slack通知(可选)。
 
-### 4. 增量基线
+### 4. 增量基线 + Pre-commit
 
 `git diff HEAD~1 --name-only`→只算变更文件新增/修改行。写入 `PROJECT_PROFILE`。coding-max步骤8只比增量≥基线。
+
+Pre-commit: 探测`.pre-commit-config.yaml`→有则追加模块测试；无则问→推荐`ruff`+`pytest`(Python)/`lint-staged`+`vitest related`(Node)。
 
 ## 硬约束
 
