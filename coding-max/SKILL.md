@@ -1,11 +1,8 @@
----
-name: coding-max
-description: 根因修复引擎。触发:修bug/定位/报错/修复/验证/debug/线上/hotfix/排查/分析/崩溃/异常。Quick是默认。
----
-
 # coding-max
 
-根因修复，不自欺，不掩盖，不遗留。
+> **触发**: "修一下这个bug" / "帮我排查这个报错" / "线上炸了赶紧修" / "看看哪里有问题" / "定位一下根因" / "debug一下"
+>
+> 根因修复，不自欺，不掩盖，不遗留。Quick 是默认。
 
 ## 铁律
 
@@ -19,8 +16,8 @@ description: 根因修复引擎。触发:修bug/定位/报错/修复/验证/debu
 
 ## 模式路由
 
-| 触发 | 模式 | 步骤 |
-|------|------|------|
+| 用户说 | 模式 | 步骤 |
+|--------|------|------|
 | 拼写/注释/字符串/格式化/import排序 | **Trivial** | 直接改→自检→验证 |
 | 常规bug **(默认)** | **Quick** | 搜病历→5Whys→假设表→TDD→自检→验证→病历 |
 | arch-/并发/多模块/自检不通过 | **Standard** | 搜病历→4域并行→假设表→CP1→插桩→Premortem→CP2→TDD→自检→验证→疫苗+胶囊 |
@@ -50,7 +47,7 @@ description: 根因修复引擎。触发:修bug/定位/报错/修复/验证/debu
 
 **4. Premortem** (Standard) — 会搞坏什么？能单commit revert？≥3边界(含1非happy-path)。
 
-**5. 冲击波** (Quick/Standard/Hotfix) — grep调用方。≤5全查。声明影响面。
+**5. 冲击波** (Quick/Standard/Hotfix) — 搜索调用方。≤5全查。声明影响面。
 
 **6. TDD** (全部) — RED(失败测试)→GREEN(最小改)→REFACTOR(消重复，Hotfix跳)。
 
