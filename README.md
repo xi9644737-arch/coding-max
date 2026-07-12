@@ -50,17 +50,26 @@ RED(测试重现)→GREEN(.get兜底)→REFACTOR(提取公共函数)→自检通
 
 ## 怎么装
 
-这是一个 **纯文本方法论文件**（Markdown + YAML），不是 npm 包、不是 VS Code 插件、不需要编译。**无论你的 AI 编程助手是什么，只要能加载 markdown 指令，就能用。**
+**一行命令：**
 
 ```bash
-# 通用方式（任何支持指令文件的 AI 工具）
-git clone https://github.com/xi9644737-arch/coding-max.git
-# 然后把 SKILL.md 放到你 AI 工具读取规则/指令的目录
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/xi9644737-arch/coding-max/master/install.ps1 | iex
 
-# Claude Code 用户
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/xi9644737-arch/coding-max/master/install.sh | bash
+```
+
+**手动：**
+
+```bash
+git clone https://github.com/xi9644737-arch/coding-max.git
+# 把 SKILL.md 放到你 AI 工具读取规则/指令的目录
+
+# Claude Code
 git clone https://github.com/xi9644737-arch/coding-max.git ~/.claude/skills/coding-max
 
-# Cursor / Windsurf 用户
+# Cursor / Windsurf
 git clone https://github.com/xi9644737-arch/coding-max.git .cursor/rules/coding-max
 
 # 其他 AI Agent（Copilot / Codex / Aider 等）
