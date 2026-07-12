@@ -19,9 +19,9 @@ coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-ma
 | CI(GitLab) | ✅/❌ | 生成.gitlab-ci.yml |
 | 覆盖率上报 | ✅/❌ | CI加Codecov |
 | Pre-commit | ✅/❌ | 问 |
-⚠️=有框架缺插件。成熟度:**S0**荒漠→**S1**有框架→**S2**有CI→**S3**全有+监控。间隙表指明当前级和缺什么。
+⚠️=有框架缺插件。成熟度:**S0**荒漠→**S1**有框架→**S2**有CI→**S3**全有+监控(覆盖率徽章/CI告警/flaky检测)。间隙表指明当前级和缺什么。
 
-### 1.装框架(S0/⚠️)
+### 1.装框架/补插件(S0/⚠️)
 | 语言 | 检测 | 框架 | Phase1 |
 |------|------|------|--------|
 | Python | pyproject.toml/setup.cfg | pytest+pytest-cov | ast.parse+裸except+可变默认 |
@@ -32,7 +32,7 @@ coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-ma
 其他→`references/universal-ci-template.yml`
 
 ### 2.两阶段冒烟
-**Phase1**(秒级，不装依赖):上表Phase1列。失败→跳Phase2。
+**Phase1**(秒级，不装依赖):上表Phase1列。失败→跳过Phase2。
 **Phase2**:Phase1通过→装依赖→跑脚手架(能跑即可)。模板见`references/smoke-templates.md`
 
 ### 3.生成CI
