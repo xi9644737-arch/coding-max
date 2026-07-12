@@ -1,0 +1,58 @@
+# coding-pipeline 通用 Docker+Bash CI 模板
+# 适用: Rust/Java/Kotlin/Ruby/Elixir/PHP/Dart 等未内置支持的语言
+# 用法: 复制到 .github/workflows/test.yml，替换 TEST_SETUP 和 TEST_RUN
+
+name: Test (Universal)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # Phase1: 静态检查 — 秒级，不装项目依赖
+  lint:
+    runs-on: ubuntu-latest
+    container: alpine:3.20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Phase1 — 语法/格式静态检查
+        run: |
+          # === 替换为你的静态检查命令 ===
+          # Rust:   rustfmt --check src/
+          # Java:   mvn checkstyle:check -q
+          # Ruby:   ruby -c **/*.rb
+          # PHP:    php -l **/*.php
+          # 通用:   检查入口文件非空
+          echo "Phase1: 请根据语言替换静态检查命令"
+          # 兜底: 确认源码目录非空
+          test -n "$(find . -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.php' | head -1)" || exit 0
+
+  # Phase2: 完整测试 — Phase1 通过后才跑
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["latest"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: |
+          # === 替换为你的环境安装命令 ===
+          # Rust:   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          # Java:   apt-get update && apt-get install -y maven
+          # Ruby:   apt-get update && apt-get install -y ruby
+          # PHP:    apt-get update && apt-get install -y php-cli
+          echo "请替换为实际环境安装命令"
+
+      - name: Install deps + test
+        run: |
+          # === 替换为你的测试命令 ===
+          # Rust:   cargo test --verbose
+          # Java:   mvn test
+          # Ruby:   bundle exec rspec
+          # PHP:    phpunit
+          echo "请替换为实际测试命令"
