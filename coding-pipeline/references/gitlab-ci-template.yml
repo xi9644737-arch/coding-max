@@ -1,4 +1,5 @@
-# coding-pipeline 参考模板: GitLab CI (两阶段)
+# coding-pipeline: GitLab CI 模板 (两阶段)
+# 生成条件: 用户指定或在项目中探测到 .gitlab-ci.yml
 # 用法: 复制到项目根目录 .gitlab-ci.yml，按需修改 src_dir 和语言版本
 
 stages:
@@ -12,19 +13,25 @@ variables:
 
 smoke:
   stage: smoke
-  image: python:3.12-slim  # 或 node:20-slim / golang:1.22-alpine
+  image: python:3.12-slim
   script:
     - |
       python -c "
       import ast, os
       src = 'app'
-      for f in os.listdir(src):
-          if f.endswith('.py'):
-              with open(os.path.join(src, f)) as fh:
-                  tree = ast.parse(fh.read())
-                  for n in ast.walk(tree):
-                      if isinstance(n, ast.ExceptHandler):
-                          assert n.type is not None, f'裸except {f}:{n.lineno}'
+      errors = []
+      for root, _, files in os.walk(src):
+          for f in files:
+              if f.endswith('.py'):
+                  path = os.path.join(root, f)
+                  try:
+                      tree = ast.parse(open(path).read())
+                      for n in ast.walk(tree):
+                          if isinstance(n, ast.ExceptHandler) and n.type is None:
+                              errors.append(f'裸except {path}:{n.lineno}')
+                  except SyntaxError as e:
+                      errors.append(f'语法错误 {path}:{e}')
+      assert not errors, '\n'.join(errors)
       print('Phase1 通过')
       "
 
@@ -34,6 +41,9 @@ test:
   stage: test
   needs: [smoke]
   image: python:3.12
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.11", "3.12", "3.13"]
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -41,9 +51,70 @@ test:
   script:
     - pip install -r requirements.txt
     - pip install pytest pytest-cov
-    - pytest tests/ --cov=app --cov-report=term-missing -v
+    - pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing -v
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+  after_script:
+    - |
+      # 失败通知 (Slack webhook — 可选，配置 SLACK_WEBHOOK_URL 变量激活)
+      if [ "$CI_JOB_STATUS" != "success" ] && [ -n "$SLACK_WEBHOOK_URL" ]; then
+        curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"❌ GitLab CI failed: ${CI_PROJECT_NAME} @ ${CI_COMMIT_REF_NAME}\n${CI_PIPELINE_URL}\"}" \
+          $SLACK_WEBHOOK_URL
+      fi
+
+# ===== Node.js 模板 (替换 smoke + test job) =====
+# smoke:
+#   stage: smoke
+#   image: node:20-slim
+#   script:
+#     - |
+#       node -e "
+#       const fs=require('fs'),path=require('path');
+#       function walk(d){const o=[];for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory()&&f.name!=='node_modules')o.push(...walk(p));else o.push(p);}return o;}
+#       const src=walk('src').filter(f=>/\.(ts|js)$/.test(f));
+#       const errors=[];
+#       for(const f of src){const c=fs.readFileSync(f,'utf-8');if(/catch\s*\(\s*\w*\s*\)\s*\{/.test(c))errors.push('裸catch: '+f);}
+#       if(errors.length){console.error(errors.join('\n'));process.exit(1);}
+#       console.log('Phase1 通过 ('+src.length+' files)');
+#       "
+#
+# test:
+#   stage: test
+#   needs: [smoke]
+#   image: node:20
+#   parallel:
+#     matrix:
+#       - NODE_VERSION: ["18", "20", "22"]
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - node_modules
+#   script:
+#     - npm ci
+#     - npx vitest run --coverage
+
+# ===== Go 模板 =====
+# smoke:
+#   stage: smoke
+#   image: golang:1.22-alpine
+#   script:
+#     - go vet ./...
+#     - go build ./...
+#
+# test:
+#   stage: test
+#   needs: [smoke]
+#   image: golang:1.22
+#   parallel:
+#     matrix:
+#       - GO_VERSION: ["1.21", "1.22", "1.23"]
+#   cache:
+#     key: ${CI_COMMIT_REF_SLUG}
+#     paths:
+#       - /go/pkg/mod
+#   script:
+#     - go test ./... -race -coverprofile=coverage.out -covermode=atomic

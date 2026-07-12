@@ -1,12 +1,11 @@
 # 断点恢复
 
-<!-- 迭代中断时自动写入，恢复后自动删除 -->
+<!-- 3-Strike硬停时写入，恢复后自动删除 -->
 
 - slug: 
-- level: Trivial | Moderate | Complex
-- mode: Standard | Hotfix | Explore
-- step: 0 | 1 | 2 | 2.5 | 3 | 4 | 5 | 6 | 7
-- N: 1 | 2 | 3
-- perspective: 数据流 | 调用链 | 配置 | 时序
-- last_action: 
+- mode: Trivial | Quick | Standard | Explore | Hotfix
+- step: 诊断(1.1/1.2/1.3) | 修复(4/5/6) | 验证(7/8/9/10)
+- strikes: 1 | 2 | 3
+- perspective: 数据流 | 调用链 | 时序
+- hypotheses: 
 - notes: 
