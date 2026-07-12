@@ -6,7 +6,7 @@
 ## 联动
 coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-max。可独立召唤。
 
-`.pipeline-done`格式: `ok:<框架>,CI=<平台>,baseline=<N>%`。coding-max读此文件确认管道就绪。
+`.pipeline-done`格式: `ok:<框架>,CI=<平台>,baseline=<N>%`。`baseline=min`=最小解锁(单文件裸脚本),CI后补。coding-max读此文件确认管道就绪。
 
 ## 流程
 
@@ -37,6 +37,7 @@ coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-ma
 
 ### 3.生成CI
 无CI→生成`.github/workflows/test.yml`(默认)/`.gitlab-ci.yml`。Monorepo→子包独立job。含:版本矩阵、缓存、Phase1→2依赖、Codecov、Slack(可选)。
+复杂环境(Phase2失败/依赖冲突/私有源)→**最小解锁**:针对当前报错文件写裸运行脚本→`.pipeline-done`标`baseline=min`→coding-max先修→CI后补。
 
 ### 4.增量基线+Pre-commit
 `git diff HEAD~1`→只算变更文件新增行。写入PROJECT_PROFILE。coding-max步骤8只比增量≥基线。
