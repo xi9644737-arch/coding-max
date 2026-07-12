@@ -19,10 +19,13 @@
 
 信号不明: 单机→Q | 多用户→S | 分布式→S
 
+## 升级闸门
+任一触发→升一级(T→Q→S): ①5Whys跨≥3文件/模块 ②冲击波>5调用方 ③自检不通过 ④Trivial改后测试炸
+
 ## 步骤
 
 **1.搜病历** — `BUG_PATTERNS.md`。精确→模糊→同义扩展。命中且一致→跳6。arch-命中→升S。
-**2.5Whys+假设表**(≥2层) — S从4域并行:①日志/报错 ②git血统(log -20+blame) ③配置/环境 ④近期变更(diff HEAD~5)。
+**2.5Whys+假设表**(≥2层) — S从4域并行:①日志/报错 ②git血统(log -20+blame) ③配置/环境 ④近期变更(diff HEAD~5)。跨≥3文件→升S。
 
 | # | 假设 | 置信度 | 验证 | 结果 |
 |---|------|--------|------|------|
@@ -31,16 +34,16 @@
 **3.插桩**(全排除/并发/时序) — ①标记状态变更点(赋值/函数口/锁) ②插[BUG-TRACE](时间戳+线程+变量+预期vs实际) ③复现→对比→找偏离→**清理**。
 🔴 **CP1**(S) — 展示假设表+根因+证据。**等确认。**
 **4.Premortem**(S) — 会搞坏什么？能单commit revert？≥3边界(含1非happy-path)。
-**5.冲击波**(Q/S/H) — 搜调用方≤5全查。声明影响面。
+**5.冲击波**(Q/S/H) — 搜调用方≤5全查。>5→升S。声明影响面。
 **6.TDD**(全部) — RED→GREEN→REFACTOR(H跳REFACTOR)。
 🔴 **CP2**(S) — 展示diff+影响面+边界。**等确认。**
-**7.三层自检**(全部) — 代码:创可贴？(if-else壳/try-catch藏/改常量/默认参数→见references) 思维:红旗？反事实:revert→bug回？不通过→+1 strike→回2。
-**8.验证**(全部) — 有测试:全跑+增量≥基线。无测试:T/Q/H→手动清单;S→PHASE.json→coding-pipeline→回8。
+**7.三层自检**(全部) — 代码:创可贴？(if-else壳/try-catch藏/改常量/默认参数→见references) 思维:红旗？反事实:revert→bug回？不通过→+1 strike→升S→回2。
+**8.验证**(全部) — 有测试:全跑+增量≥基线。无测试:T/Q/H→手动清单；S→输出`调用coding-pipeline:{路径},{语言}`→读`.pipeline-done`→回8。
 **9.沉淀**(Q/S) — 病历→`BUG_PATTERNS`。疫苗→lint/CI(见映射表)。胶囊→弯路/突破/误导≥1项。arch-≥3→⚠️架构负债。
 **10.墓碑** — 清[BUG-TRACE]/临时test/调试日志。
 
 ## 文件
-`BUG_PATTERNS.md` | `PROJECT_PROFILE.md` | `bugs/` | `.resume.md`(读→跳→继续→删) | `PHASE.json`(idle→bootstrapping→testing→done)
+`BUG_PATTERNS.md` | `PROJECT_PROFILE.md` | `bugs/` | `.resume.md`(读→跳→继续→删) | `.pipeline-done`(coding-pipeline完工标记)
 
 ## 参考
 `references/patch-signals.md`(补丁+红旗+异味+反事实+Premortem) | `references/bug-memory-format.md`(病历/同义/疫苗/止血) | `../coding-pipeline`
