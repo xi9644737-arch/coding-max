@@ -1,6 +1,6 @@
 # coding-pipeline
 
-> **触发**: "搭测试"/"配CI"/"加覆盖率"/"没有测试"/"搭流水线"
+> **触发**: "搭测试"/"add tests"/"配CI"/"setup CI"/"加覆盖率"/"没有测试"/"搭流水线"
 > 只通管道不写业务测试。CI能跑+冒烟通过+增量基线有=完工。业务测试留给coding-max。
 
 ## 联动
@@ -19,7 +19,9 @@ coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-ma
 | CI(GitLab) | ✅/❌ | 生成.gitlab-ci.yml |
 | 覆盖率上报 | ✅/❌ | CI加Codecov |
 | Pre-commit | ✅/❌ | 问 |
-⚠️=有框架缺插件。成熟度:**S0**荒漠→**S1**有框架→**S2**有CI→**S3**全有+监控(覆盖率徽章/CI告警/flaky检测)。间隙表指明当前级和缺什么。
+⚠️=有框架缺插件。成熟度:**S0**荒漠→**S1**有框架→**S2**有CI→**S3**全有+监控(覆盖率徽章/CI告警/flaky检测)。S3→输出健康报告(覆盖率趋势/flaky检测/CI稳定性/依赖过期),不改配置。
+
+🔴 **确认** — 展示间隙表+成熟度+行动清单。**等用户确认。** S0/⚠️→装框架;S2→只加覆盖率;S3→健康报告→完工。
 
 ### 1.装框架/补插件(S0/⚠️)
 | 语言 | 检测 | 框架 | Phase1 |
@@ -36,7 +38,7 @@ coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-ma
 **Phase2**:Phase1通过→装依赖→跑脚手架(能跑即可)。模板见`references/smoke-templates.md`
 
 ### 3.生成CI
-无CI→生成`.github/workflows/test.yml`(默认)/`.gitlab-ci.yml`。Monorepo→子包独立job。含:版本矩阵、缓存、Phase1→2依赖、Codecov、Slack(可选)。
+无CI→生成`.github/workflows/test.yml`(默认)/`.gitlab-ci.yml`。自动检测版本(`pyproject.toml`/`package.json`/`go.mod`)/源码目录/测试命令。Monorepo→子包独立job。含:版本矩阵、缓存、Phase1→2依赖、Codecov、Slack(可选)。
 复杂环境(Phase2失败/依赖冲突/私有源)→**最小解锁**:针对当前报错文件写裸运行脚本→`.pipeline-done`标`baseline=min`→coding-max先修→CI后补。
 
 ### 4.增量基线+Pre-commit
