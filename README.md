@@ -30,6 +30,24 @@ Explore          Quick           Standard         Hotfix
 
 ---
 
+## 快速预览
+
+**你说：** "用户列表接口偶尔 500，日志里是 `KeyError: 'display_name'`"
+
+**AI（Quick 模式）：**
+
+```
+初审 → 定位 user_service.py:142 → 5 Whys → 根因：老用户缺字段+兜底逻辑分散
+RED(测试重现)→GREEN(.get兜底)→REFACTOR(提取公共函数)→自检通过→14/14测试通过
+
+修复：.get("display_name", user.get("username", "unknown"))
+病历追加：key-error, arch-missing-abstraction
+```
+
+更多 → [`examples/`](examples/)
+
+---
+
 ## 怎么装
 
 这是一个 **纯文本方法论文件**（Markdown + YAML），不是 npm 包、不是 VS Code 插件、不需要编译。**无论你的 AI 编程助手是什么，只要能加载 markdown 指令，就能用。**
@@ -95,6 +113,10 @@ AI 冒出以下念头 → 立刻停止，回到步骤 2 换视角：
 
 ```
 ├── SKILL.md                    # 主引擎（4.4KB）
+├── examples/
+│   ├── 01-quick-fix.md         # Quick 模式示例
+│   ├── 02-explore-mode.md      # Explore 模式示例
+│   └── 03-hotfix.md            # Hotfix 模式示例
 ├── references/
 │   ├── patch-signals.md        # 5个补丁信号 + 6个认知红旗 + 架构异味
 │   └── bug-memory-format.md    # 病历格式 + 同义映射 + 疫苗映射 + 修复范例
