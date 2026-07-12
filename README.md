@@ -38,10 +38,10 @@ Explore          Quick           Standard         Hotfix
 
 ```bash
 # 全局装（所有项目生效）
-git clone https://github.com/<your-username>/coding-max.git ~/.claude/skills/coding-max
+git clone https://github.com/xi9644737-arch/coding-max.git ~/.claude/skills/coding-max
 
 # 项目装（只对当前项目生效）
-git clone https://github.com/<your-username>/coding-max.git .claude/skills/coding-max
+git clone https://github.com/xi9644737-arch/coding-max.git .claude/skills/coding-max
 ```
 
 克隆完即用。不需要编译、不需要依赖、不需要 `npm run anything`。
