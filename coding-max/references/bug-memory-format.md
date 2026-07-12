@@ -2,6 +2,16 @@
 
 ## 记录格式
 
+### 自动提取（步骤7默认）
+从 `git diff --stat` + commit message 自动生成，人工确认：
+```bash
+git diff --stat HEAD~1 | tail -1  # → "3 files changed, 12 insertions(+), 5 deletions(-)"
+git log -1 --format="%s"          # → "fix: KeyError when user missing email field"
+```
+生成摘要: `2026-07-12 · main.py:19 KeyError — 用户缺少email字段时get_user崩溃`
+
+### 手动格式（自动提取失败时）
+
 ```markdown
 ### YYYY-MM-DD · <简短标题>
 - 症状: <用户原始描述或报错信息摘要>

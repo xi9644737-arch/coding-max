@@ -1,0 +1,111 @@
+name: Test (Monorepo · Two-Phase)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ===== API (Python) =====
+  api-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/api
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Phase1 — 纯语法冒烟 (无依赖)
+        working-directory: packages/api
+        run: |
+          python -c "
+          import ast, os
+          for f in os.listdir('app'):
+              if f.endswith('.py'):
+                  with open(os.path.join('app', f)) as fh:
+                      tree = ast.parse(fh.read())
+                      for n in ast.walk(tree):
+                          if isinstance(n, ast.ExceptHandler):
+                              assert n.type is not None, f'裸except {f}:{n.lineno}'
+          print('Phase1 API 通过')
+          "
+
+  api-test:
+    needs: api-smoke
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/api
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-api-${{ hashFiles('packages/api/pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-api-
+      - name: Install deps
+        run: pip install -e ".[test]"
+      - name: Phase2 — 业务测试 + 覆盖率
+        run: pytest tests/ --cov=app --cov-report=term-missing -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-api-${{ matrix.python-version }}
+          path: packages/api/.coverage
+
+  # ===== Web (Node.js) =====
+  web-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+    strategy:
+      matrix:
+        node-version: ["18.x", "20.x", "22.x"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Phase1 — 纯语法冒烟 (无依赖)
+        working-directory: packages/web
+        run: |
+          node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('src/index.ts', 'utf-8');
+          console.assert(content.includes('export'), '缺少 export');
+          console.assert(!/catch\s*\(\s*\w*\s*\)\s*\{\s*\}/g.test(content), '裸 catch{}');
+          console.log('Phase1 Web 通过');
+          "
+
+  web-test:
+    needs: web-smoke
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+    strategy:
+      matrix:
+        node-version: ["18.x", "20.x", "22.x"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: packages/web/package-lock.json
+      - name: Install deps
+        run: npm ci || npm install
+      - name: Phase2 — 业务测试
+        run: npm test

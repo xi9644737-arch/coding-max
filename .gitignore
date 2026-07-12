@@ -1,1 +1,7 @@
 .project-memory/
+__pycache__/
+.coverage
+node_modules/
+*.egg-info/
+package-lock.json
+.pytest_cache/

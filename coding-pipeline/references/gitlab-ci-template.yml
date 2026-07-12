@@ -1,0 +1,49 @@
+# coding-pipeline 参考模板: GitLab CI (两阶段)
+# 用法: 复制到项目根目录 .gitlab-ci.yml，按需修改 src_dir 和语言版本
+
+stages:
+  - smoke
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# ===== Phase1: 纯语法冒烟 (秒级，不装依赖) =====
+
+smoke:
+  stage: smoke
+  image: python:3.12-slim  # 或 node:20-slim / golang:1.22-alpine
+  script:
+    - |
+      python -c "
+      import ast, os
+      src = 'app'
+      for f in os.listdir(src):
+          if f.endswith('.py'):
+              with open(os.path.join(src, f)) as fh:
+                  tree = ast.parse(fh.read())
+                  for n in ast.walk(tree):
+                      if isinstance(n, ast.ExceptHandler):
+                          assert n.type is not None, f'裸except {f}:{n.lineno}'
+      print('Phase1 通过')
+      "
+
+# ===== Phase2: 完整测试 (Phase1 通过后才跑) =====
+
+test:
+  stage: test
+  needs: [smoke]
+  image: python:3.12
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/pip
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest pytest-cov
+    - pytest tests/ --cov=app --cov-report=term-missing -v
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml

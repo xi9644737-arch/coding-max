@@ -3,3 +3,6 @@ name = "api"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = ["fastapi", "uvicorn"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pytest-cov>=5.0"]
