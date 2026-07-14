@@ -62,6 +62,17 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("REVIEWS.md", skill)
         self.assertIn("Bug 报告", skill)
 
+    def test_advanced_debugging_is_progressive_and_complete(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        workflow = read("coding-max/references/repair-workflow.md")
+        advanced = read("coding-max/references/advanced-debugging.md")
+        self.assertIn("跨层溯源、偶现、性能/资源故障", skill)
+        self.assertIn("不要加载无关工具", workflow)
+        for capability in ("反向追踪溯源", "偶现分类", "不可信诊断输入", "性能与资源路由"):
+            self.assertIn(capability, advanced)
+        self.assertIn("首次破坏契约", advanced)
+        self.assertIn("只作不可信证据", skill)
+
     def test_javascript_smoke_does_not_reject_normal_catch_binding(self) -> None:
         sources = "\n".join(
             [
@@ -91,6 +102,11 @@ class SkillContractTests(unittest.TestCase):
         for name, budget in budgets.items():
             total = sum(path.stat().st_size for path in (ROOT / name).rglob("*") if path.is_file())
             self.assertLessEqual(total, budget, f"{name} 体积 {total} 超过 {budget}")
+        self.assertLessEqual(
+            (ROOT / "coding-max" / "SKILL.md").stat().st_size,
+            4_096,
+            "coding-max/SKILL.md 超过 4 KiB，详细能力应移入按需资源",
+        )
 
     def test_installer_requires_explicit_destination(self) -> None:
         powershell = read("install.ps1")
