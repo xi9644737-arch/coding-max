@@ -1,177 +1,29 @@
-# coding-pipeline: 通用 Docker+Bash CI 模板
-# 适用: Rust/Java/PHP/Ruby/Elixir/Dart/Kotlin 等未内置详细模板的语言
-# 用法: 复制到 .github/workflows/test.yml，替换 TEST_SETUP 和 TEST_RUN
-# 语言特定示例见下方注释块
-
-name: Test (Universal)
-
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-
-jobs:
-  # Phase1: 静态检查 — 秒级，不装项目依赖
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Phase1 — 静态检查 (按语言替换)
-        run: |
-          # === 替换为你的静态检查命令 ===
-          # Rust:   cargo check --workspace && cargo clippy -- -D warnings
-          # Java:   mvn compile -q  |  ./gradlew compileJava
-          # Ruby:   ruby -c **/*.rb
-          # PHP:    find . -name '*.php' -exec php -l {} \;
-          # Elixir: mix compile --warnings-as-errors
-          # Dart:   dart analyze
-          # 兜底: 确认源码目录非空
-          test -n "$(find . -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.php' -o -name '*.ex' -o -name '*.dart' | head -1)" || exit 0
-
-  # Phase2: 完整测试 — Phase1 通过后才跑
-  test:
-    needs: lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ["latest"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup environment
-        run: |
-          # === 替换为你的环境安装命令 ===
-          # Rust:   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          # Java:   apt-get update && apt-get install -y maven
-          # Ruby:   apt-get update && apt-get install -y ruby
-          # PHP:    apt-get update && apt-get install -y php-cli php-xml
-          # 或直接使用对应 setup action (setup-java, setup-ruby, etc.)
-          echo "请替换为实际环境安装命令"
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            # Rust:   ~/.cargo/registry, ~/.cargo/git, target
-            # Java:   ~/.m2/repository
-            # Ruby:   vendor/bundle
-            # PHP:    vendor
-          key: deps-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/pom.xml', '**/Gemfile.lock', '**/composer.lock') }}
-          restore-keys: deps-${{ runner.os }}-
-
-      - name: Install deps + run tests
-        run: |
-          # === 替换为你的测试命令 ===
-          # Rust:   cargo test --workspace
-          # Java:   mvn test jacoco:report
-          # Ruby:   bundle exec rspec
-          # PHP:    phpunit --coverage-clover coverage.xml
-          echo "请替换为实际测试命令"
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.xml   # 按语言调整: lcov.info(Rust), jacoco.xml(Java), coverage.xml(PHP)
-          flags: universal
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Notify failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
-          payload: |
-            {"text": "❌ Test failed: ${{ github.repository }} @ ${{ github.ref_name }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
-
-# ===== Rust 完整示例 =====
-# jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: dtolnay/rust-toolchain@stable
-#         with:
-#           components: clippy
-#       - uses: actions/cache@v4
-#         with:
-#           path: |
-#             ~/.cargo/registry
-#             ~/.cargo/git
-#             target
-#           key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
-#           restore-keys: cargo-${{ runner.os }}-
-#       - run: cargo check --workspace
-#       - run: cargo clippy --workspace -- -D warnings
-#
-#   test:
-#     needs: lint
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         toolchain: [stable, beta]
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: dtolnay/rust-toolchain@stable
-#         with:
-#           toolchain: ${{ matrix.toolchain }}
-#       - uses: actions/cache@v4
-#         with:
-#           path: |
-#             ~/.cargo/registry
-#             ~/.cargo/git
-#             target
-#           key: cargo-${{ runner.os }}-${{ matrix.toolchain }}-${{ hashFiles('Cargo.lock') }}
-#           restore-keys: cargo-${{ runner.os }}-${{ matrix.toolchain }}-
-#       - run: cargo test --workspace
-#       - run: cargo install cargo-llvm-cov && cargo llvm-cov --workspace --lcov --output-path lcov.info
-#       - uses: codecov/codecov-action@v4
-#         with:
-#           file: ./lcov.info
-#           flags: rust-${{ matrix.toolchain }}
-#         env:
-#           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-# ===== Java 完整示例 =====
-# jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-java@v4
-#         with:
-#           java-version: '21'
-#           distribution: 'temurin'
-#       - uses: actions/cache@v4
-#         with:
-#           path: ~/.m2/repository
-#           key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-#           restore-keys: maven-${{ runner.os }}-
-#       - run: mvn compile -q
-#
-#   test:
-#     needs: lint
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         java-version: ['17', '21']
-#     steps:
-#       - uses: actions/checkout@v4
-#       - uses: actions/setup-java@v4
-#         with:
-#           java-version: ${{ matrix.java-version }}
-#           distribution: 'temurin'
-#       - uses: actions/cache@v4
-#         with:
-#           path: ~/.m2/repository
-#           key: maven-${{ runner.os }}-${{ matrix.java-version }}-${{ hashFiles('**/pom.xml') }}
-#           restore-keys: maven-${{ runner.os }}-${{ matrix.java-version }}-
-#       - run: mvn test jacoco:report -B
-#       - uses: codecov/codecov-action@v4
-#         with:
-#           file: ./target/site/jacoco/jacoco.xml
-#           flags: java-${{ matrix.java-version }}
-#         env:
-#           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+# Platform-neutral phase contract for CI systems without a dedicated reference.
+# Translate this structure to the target platform; this file is not a runnable workflow.
+version: 1
+exclude:
+  - .git
+  - node_modules
+  - .venv
+  - vendor
+  - target
+  - build
+  - dist
+  - .cache
+  - .pytest_cache
+  - __pycache__
+packages:
+  - name: __PACKAGE__
+    workdir: __WORKDIR__
+    runtime: __PINNED_RUNTIME__
+    dependency_source: __LOCKFILE_OR_MANIFEST__
+    stages:
+      preflight: __STATIC_OR_TOOLCHAIN_COMMAND__
+      install: __REPRODUCIBLE_INSTALL_COMMAND__
+      test: __TEST_COMMAND_WITH_REAL_EXIT_CODE__
+      coverage: __COVERAGE_COMMAND_OR_UNKNOWN__
+completion:
+  require_each_package: true
+  require_no_placeholders: true
+  remote_success_only_if_observed: true
+  external_integrations_require_authorization: true

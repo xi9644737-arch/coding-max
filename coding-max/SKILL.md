@@ -1,49 +1,42 @@
+---
+name: coding-max
+description: 修复软件缺陷、排查异常、定位根因、处理 hotfix、验证修复，或在实现完成后审查代码并修复确认的问题。用户提到修 bug、fix、debug、报错、崩溃、线上故障、根因分析、代码审查、质量检查或验证修复时使用。
+---
+
 # coding-max
 
-> **触发**: "修bug"/"fix bug"/"排查报错"/"线上炸了"/"看看哪里有问题"/"定位根因"/"debug"
-> 根因修复。不自欺不掩盖不遗留。默认Quick。
+用证据定位根因，以测试约束修复，并把实际改动沉淀为可检索病历。
 
-## 铁律
-1.不自欺("应该就是X""先修后面补""再试一次"→停) 2.RED先于GREEN 3.禁裸吞异常(except:/catch{}/recover()必带类型) 4.不确定=说不确定 5.最小修复(只改冲击波，arch-止血不重构)
-≥3次失败→硬停，展示所有尝试，请用户介入。
+## 路由
 
-## 模式
+- **Explore**：只诊断，不改代码或项目记忆。读取 `references/repair-workflow.md` 的诊断部分。
+- **Review**：审查实现/diff；未授权修复则只报告。读取 `references/patch-signals.md`；需落盘再读病历格式。
+- **Trivial/Quick**：文案格式类/单模块小影响；Quick 默认。读取 repair workflow；改代码必须读病历格式。
+- **Standard**：并发、多模块、架构或高风险；同上，并完整执行影响面/Premortem。
+- **Hotfix**：线上紧急；先止血验证，事后补 `[HOTFIX]` 病历。
 
-| 信号 | 模式 |
-|------|------|
-| 拼写/注释/字符串/格式化/import排序 | **T**(Trivial) |
-| 常规bug(默认) | **Q**(Quick) |
-| arch-/并发/多模块/自检不通过 | **S**(Standard) |
-| "看看/排查/分析"(不改代码) | **E**(Explore) |
-| "线上/紧急/hotfix" | **H**(Hotfix) |
+“修复后终审”走 Quick/Standard→Review；实现已完成直接 Review。范围外旧问题只记风险，除非用户授权扩大。
 
-信号不明: 单机→Q | 多用户→S | 分布式→S
+## 任务边界
 
-## 升级闸门
-任一触发→升一级(T→Q→S): ①5Whys跨≥3文件/模块 ②冲击波>5调用方 ③自检不通过 ④Trivial改后测试炸
+任务根优先级：用户明确目录 > 最近 manifest/config > Git 根；不得污染无关父仓库。统一写任务根 `.project-memory/`。从 `memory-template/` 初始化缺项，不覆盖旧内容。仓库指令要求沉淀即视为授权，否则首次创建前询问；显式只读时只在回复中按同结构交付。
 
-## 步骤
+Review 先看目标 diff，再查被改契约、调用方和测试，只报告影响行为、安全、数据或架构的确认问题。发现需修复的缺陷，切 Quick/Standard 完成后回 Review。
 
-**1.裁剪+搜病历** — 先裁剪上下文:只看报错文件+调用链+`git blame`最近3次修改。再搜`BUG_PATTERNS.md`(精确→模糊→同义扩展)。命中且一致→跳6。arch-命中→升S。
-**2.5Whys+假设表**(≥2层) — 有MCP运行时→附加trace/采样。Q:报错栈+git血统。S:4域并行(①日志/报错 ②git血统 ③配置/环境 ④近期变更)。跨≥3文件→升S。
+## 完成条件
 
-| # | 假设 | 置信度 | 验证 | 结果 |
-|---|------|--------|------|------|
+所有实际代码改动必须有 RED/可重复失败证据、根因、最小修复、相关验证和已关闭 Bug 报告；通过写 `resolved`，未解写 `blocked`，并更新 `BUG_PATTERNS.md`。Review 写范围、发现/处置、验证、剩余风险，更新 `REVIEWS.md`。仅联动 pipeline 时使用 `.project-memory/PHASE.json`。
 
-按置信度排。验证→填结果。全排除→3。
-**3.插桩**(全排除/并发/时序) — ①标记状态变更点(赋值/函数口/锁) ②插[BUG-TRACE](时间戳+线程+变量+预期vs实际) ③复现→对比→找偏离→**清理**。
-🔴 **CP1**(S) — 展示假设表+根因+证据。**等确认。**
-**4.Premortem**(S) — 会搞坏什么？能单commit revert？≥3边界(含1非happy-path)。
-**5.冲击波**(Q/S/H) — 搜调用方≤5全查。>5→升S。声明影响面。
-**6.TDD**(全部) — ≥2种策略(A止血最小/B重构彻底)→对比影响面+复杂度→选优→RED→GREEN→REFACTOR(H跳REFACTOR)。
-🔴 **CP2**(S) — 展示diff+影响面+边界。**等确认。**
-**7.三层自检**(全部) — 代码(创可贴?):if-else壳/try-catch藏/改常量/默认参数/解释不了/循环嵌套/循环查询/泄漏 思维(红旗?):"应该就是""先修后面补""跳过测试""试试改X""不确定""再试一次"≥2 反事实:revert→bug回? 不通过→+1 strike→升S→回2。
-**8.验证**(全部) — 有测试:全跑+增量≥基线→注3变异(>→>=/删null/改边界)→拦截?未拦截→补测试。无测试:T/Q/H→手动清单(复现+预期vs实际+边界≥3);S→调用coding-pipeline→读`.pipeline-done`→回8。
-**9.沉淀**(Q/S) — 病历→`BUG_PATTERNS`。疫苗→lint/CI(见映射表)。胶囊→弯路/突破/误导≥1项。arch-≥3→⚠️架构负债。
-**10.墓碑** — 清[BUG-TRACE]/临时test/调试日志。
+不得把无关既有失败算成本次回归或声称全量通过；连续三次当前修复失败时写 `.resume.md` 并硬停。最后清理 trace、临时测试/日志和完成的恢复点。
 
-## 文件
-`BUG_PATTERNS.md` | `PROJECT_PROFILE.md` | `bugs/` | `.resume.md`(读→跳→继续→删) | `.pipeline-done`(coding-pipeline完工标记)
+## 硬约束
 
-## 参考
-`references/patch-signals.md`(补丁+红旗+异味+反事实+Premortem) | `references/bug-memory-format.md`(病历/同义/疫苗/止血) | `../coding-pipeline`
+RED 先于 GREEN；异常须处理/传播/记录上下文；不把假设当根因，不伪造命令、覆盖率或 CI；不越界重构，不做未授权 push、全局安装或破坏操作。单 Agent 完整执行，不依赖子代理、特定模型或 MCP。
+
+## 按需资源
+
+- 诊断、影响面、TDD、验证、关闭：`references/repair-workflow.md`
+- Review/Premortem/架构信号：`references/patch-signals.md`
+- 病历/Review/PHASE/恢复格式：`references/bug-memory-format.md`
+- 初始化：`memory-template/`
+- 测试荒漠：`../coding-pipeline/SKILL.md`

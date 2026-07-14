@@ -1,18 +1,29 @@
-#!/bin/bash
-# coding-max + coding-pipeline 安装脚本 (macOS/Linux)
-# 用法: curl -fsSL https://raw.githubusercontent.com/xi9644737-arch/coding-max/master/install.sh | bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <skills-directory>" >&2
+  exit 2
+fi
 
 REPO="https://github.com/xi9644737-arch/coding-max.git"
-TMP=$(mktemp -d)
-SKILLS_DIR="${HOME}/.claude/skills"
+TMP="$(mktemp -d)"
+SKILLS_DIR="$1"
 
-echo "正在安装 coding-max + coding-pipeline..."
+cleanup() { rm -rf -- "$TMP"; }
+trap cleanup EXIT
+
 git clone --depth 1 "$REPO" "$TMP"
+mkdir -p "$SKILLS_DIR"
+backup_root="$(dirname "$SKILLS_DIR")/.skill-backups/$(date +%Y%m%d-%H%M%S)"
 
-cp -r "$TMP/coding-max" "$SKILLS_DIR/coding-max"
-cp -r "$TMP/coding-pipeline" "$SKILLS_DIR/coding-pipeline"
-rm -rf "$TMP"
-
-echo "完成！"
-echo "  coding-max:      $SKILLS_DIR/coding-max"
-echo "  coding-pipeline: $SKILLS_DIR/coding-pipeline"
+for name in coding-max coding-pipeline; do
+  target="$SKILLS_DIR/$name"
+  if [[ -d "$target" ]]; then
+    mkdir -p "$backup_root"
+    cp -R "$target" "$backup_root/$name"
+    rm -rf -- "$target"
+  fi
+  cp -R "$TMP/$name" "$target"
+  echo "Installed: $target"
+done

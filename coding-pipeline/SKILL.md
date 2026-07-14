@@ -1,55 +1,43 @@
+---
+name: coding-pipeline
+description: 为缺少测试或持续集成的项目建立、修复测试基础设施、CI、覆盖率基线与 pre-commit，并支持 Monorepo。用户提到搭测试、测试基建、配置 CI、GitHub Actions、GitLab CI、覆盖率、无测试、流水线失败或 coding-max 请求 bootstrap 时使用。
+---
+
 # coding-pipeline
 
-> **触发**: "搭测试"/"add tests"/"配CI"/"setup CI"/"加覆盖率"/"没有测试"/"搭流水线"
-> 只通管道不写业务测试。CI能跑+冒烟通过+增量基线有=完工。业务测试留给coding-max。
+建立可验证的测试管道；冒烟不代替业务测试，不夸大本地或远程结果。
 
-## 联动
-coding-max步骤8无测试→本skill→完工写`.pipeline-done`→回coding-max。可独立召唤。
+## 边界与状态
 
-`.pipeline-done`格式: `ok:<框架>,CI=<平台>,baseline=<N>%`。`baseline=min`=最小解锁(单文件裸脚本),CI后补。coding-max读此文件确认管道就绪。
+任务根：用户明确目录 > 最近 manifest/config > Git 根。递归排除依赖、vendor、构建与缓存目录。逐包审计 Monorepo，任一失败不得被汇总成功掩盖。
 
-## 流程
+共用任务根 `.project-memory/PHASE.json`：`idle→bootstrapping→testing→done|failed`。旧任务结束后可保留报告并重置；不同 target 仍活动时不得覆盖。仅实际观察远程 CI 成功才写 `remote`，否则最多 `local`。细节和报告格式读取 `references/pipeline-workflow.md`。
 
-### 0.审计(读配置文件即可，无需装依赖)
-递归Monorepo子包。输出间隙表:
-| 检查项 | 状态 | 行动 |
-|--------|------|------|
-| 测试框架 | ✅/⚠️/❌ | 装/补配置/— |
-| CI(GitHub) | ✅/❌ | 生成test.yml |
-| CI(GitLab) | ✅/❌ | 生成.gitlab-ci.yml |
-| 覆盖率上报 | ✅/❌ | CI加Codecov |
-| Pre-commit | ✅/❌ | 问 |
-⚠️=有框架缺插件。成熟度:**S0**荒漠→**S1**有框架→**S2**有CI→**S3**全有+监控(覆盖率徽章/CI告警/flaky检测)。S3→输出健康报告(覆盖率趋势/flaky检测/CI稳定性/依赖过期),不改配置。
+## 路由
 
-🔴 **确认** — 展示间隙表+成熟度+行动清单。**等用户确认。** S0/⚠️→装框架;S2→只加覆盖率;S3→健康报告→完工。
+- **只审计**：读取 pipeline workflow；输出逐包成熟度与差距，不改文件。
+- **搭/修本地测试**：再读 `references/smoke-templates.md`，只选择目标语言部分。
+- **GitHub Actions**：再读 `references/github-actions-ci-template.yml`。
+- **GitLab CI**：再读 `references/gitlab-ci-template.yml`。
+- **其他平台/语言**：再读 `references/universal-ci-template.yml`。
 
-### 1.装框架/补插件(S0/⚠️)
-| 语言 | 检测 | 框架 | Phase1 |
-|------|------|------|--------|
-| Python | pyproject.toml/setup.cfg | pytest+pytest-cov | ast.parse+裸except+可变默认 |
-| Node/TS | package.json | vitest/jest | 入口+裸catch+import |
-| Go | go.mod | testing+testify | go vet+go build |
-| Rust | Cargo.toml | cargo test+llvm-cov | cargo check+clippy |
-| Java | pom.xml/build.gradle | JUnit5+JaCoCo | mvn/gradle compile |
-其他→`references/universal-ci-template.yml`
+不要同时加载无关语言或 CI 平台 reference。
 
-### 2.两阶段冒烟
-**Phase1**(秒级，不装依赖):上表Phase1列。失败→跳过Phase2。
-**Phase2**:Phase1通过→装依赖→跑脚手架(能跑即可)。模板见`references/smoke-templates.md`
+## 完成条件
 
-### 3.生成CI
-无CI→生成`.github/workflows/test.yml`(默认)/`.gitlab-ci.yml`。自动检测版本(`pyproject.toml`/`package.json`/`go.mod`)/源码目录/测试命令。Monorepo→子包独立job。含:版本矩阵、缓存、Phase1→2依赖、Codecov、Slack(可选)。
-复杂环境(Phase2失败/依赖冲突/私有源)→**最小解锁**:针对当前报错文件写裸运行脚本→`.pipeline-done`标`baseline=min`→coding-max先修→CI后补。
+静态预检、工具链预检、真实测试退出码和生成 CI 语法均按任务范围验证；模板无占位、示例路径、未使用变量或假通过命令。覆盖率无可靠来源写 `unknown`。远程未运行只能写“已配置、待验证”。
 
-### 4.增量基线+Pre-commit
-`git diff HEAD~1`→只算变更文件新增行。写入PROJECT_PROFILE。coding-max步骤8只比增量≥基线。
-Pre-commit:探测`.pre-commit-config.yaml`→有则追加测试;无则问→推荐ruff+pytest(Python)/lint-staged+vitest(Node)。
-
-### 5.完工
-写`.pipeline-done`:`ok:<框架>,CI=<平台>,baseline=<N>%`。通知coding-max管道就绪。
+完成后更新 `PROJECT_PROFILE.md`、`pipelines/PIPELINE-日期-slug.md`、`PIPELINES.md` 和 PHASE。失败重试必须换证据视角，第三次写 `failed` 和报告路径。
 
 ## 硬约束
-1.不写业务测试 2.Phase1不装依赖 3.Phase2才装 4.不装全局CLI 5.CI跑通+写.pipeline-done再提交 6.增量不卡全局% 7.已有不重复 8.已有CI不覆盖 9.Python/Node/Go/Rust/Java一等 10.审计用文件工具 11.Monorepo子包独立 12.CI含缓存+覆盖率
 
-## 参考
-`references/smoke-templates.md` | `references/gitlab-ci-template.yml` | `references/universal-ci-template.yml` | `../coding-max`
+不让冒烟冒充回归；不覆盖现有框架/CI/用户改动；不安装用户全局 CLI；不伪造覆盖率、依赖可复现性或远程状态；外部集成必须已有配置或获授权。单 Agent 完整执行，不绑定子代理、模型或 MCP。
+
+## 按需资源
+
+- 审计、框架、状态、验证、报告：`references/pipeline-workflow.md`
+- 五语言预检：`references/smoke-templates.md`
+- GitHub Actions：`references/github-actions-ci-template.yml`
+- GitLab CI：`references/gitlab-ci-template.yml`
+- 其他平台：`references/universal-ci-template.yml`
+- Bug/TDD：`../coding-max/SKILL.md`

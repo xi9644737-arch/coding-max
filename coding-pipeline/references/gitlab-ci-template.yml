@@ -1,120 +1,47 @@
-# coding-pipeline: GitLab CI 模板 (两阶段)
-# 生成条件: 用户指定或在项目中探测到 .gitlab-ci.yml
-# 用法: 复制到项目根目录 .gitlab-ci.yml，按需修改 src_dir 和语言版本
+# REFERENCE_ONLY: replace every __TOKEN__ and add one matrix row per package.
+stages: [preflight, test]
 
-stages:
-  - smoke
-  - test
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-# ===== Phase1: 纯语法冒烟 (秒级，不装依赖) =====
-
-smoke:
-  stage: smoke
-  image: python:3.12-slim
+preflight:
+  stage: preflight
+  image: __TOOLCHAIN_IMAGE__
+  parallel:
+    matrix:
+      - PACKAGE: __PACKAGE__
+        WORKDIR: __WORKDIR__
+        STATIC_COMMAND: __STATIC_COMMAND__
   script:
-    - |
-      python -c "
-      import ast, os
-      src = 'app'
-      errors = []
-      for root, _, files in os.walk(src):
-          for f in files:
-              if f.endswith('.py'):
-                  path = os.path.join(root, f)
-                  try:
-                      tree = ast.parse(open(path).read())
-                      for n in ast.walk(tree):
-                          if isinstance(n, ast.ExceptHandler) and n.type is None:
-                              errors.append(f'裸except {path}:{n.lineno}')
-                  except SyntaxError as e:
-                      errors.append(f'语法错误 {path}:{e}')
-      assert not errors, '\n'.join(errors)
-      print('Phase1 通过')
-      "
-
-# ===== Phase2: 完整测试 (Phase1 通过后才跑) =====
+    - cd "$WORKDIR"
+    - eval "$STATIC_COMMAND"
 
 test:
   stage: test
-  needs: [smoke]
-  image: python:3.12
+  needs: [preflight]
+  image: __TOOLCHAIN_IMAGE__
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.11", "3.12", "3.13"]
+      - PACKAGE: __PACKAGE__
+        WORKDIR: __WORKDIR__
+        MANIFEST: __LOCKFILE_OR_MANIFEST__
+        INSTALL_COMMAND: __INSTALL_COMMAND__
+        TEST_COMMAND: __TEST_COMMAND_WITH_COVERAGE__
+        COVERAGE_FILE: __COVERAGE_FILE__
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .cache/pip
+    key:
+      files: [__LOCKFILE_OR_MANIFEST__]
+      prefix: "$PACKAGE"
+    paths: [__CACHE_PATH__]
   script:
-    - pip install -r requirements.txt
-    - pip install pytest pytest-cov
-    - pytest tests/ --cov=app --cov-report=xml --cov-report=term-missing -v
+    - cd "$WORKDIR"
+    - eval "$INSTALL_COMMAND"
+    - eval "$TEST_COMMAND"
   artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-  after_script:
-    - |
-      # 失败通知 (Slack webhook — 可选，配置 SLACK_WEBHOOK_URL 变量激活)
-      if [ "$CI_JOB_STATUS" != "success" ] && [ -n "$SLACK_WEBHOOK_URL" ]; then
-        curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"❌ GitLab CI failed: ${CI_PROJECT_NAME} @ ${CI_COMMIT_REF_NAME}\n${CI_PIPELINE_URL}\"}" \
-          $SLACK_WEBHOOK_URL
-      fi
+    when: always
+    paths: [__COVERAGE_FILE__]
 
-# ===== Node.js 模板 (替换 smoke + test job) =====
-# smoke:
-#   stage: smoke
-#   image: node:20-slim
-#   script:
-#     - |
-#       node -e "
-#       const fs=require('fs'),path=require('path');
-#       function walk(d){const o=[];for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory()&&f.name!=='node_modules')o.push(...walk(p));else o.push(p);}return o;}
-#       const src=walk('src').filter(f=>/\.(ts|js)$/.test(f));
-#       const errors=[];
-#       for(const f of src){const c=fs.readFileSync(f,'utf-8');if(/catch\s*\(\s*\w*\s*\)\s*\{/.test(c))errors.push('裸catch: '+f);}
-#       if(errors.length){console.error(errors.join('\n'));process.exit(1);}
-#       console.log('Phase1 通过 ('+src.length+' files)');
-#       "
-#
-# test:
-#   stage: test
-#   needs: [smoke]
-#   image: node:20
-#   parallel:
-#     matrix:
-#       - NODE_VERSION: ["18", "20", "22"]
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - node_modules
-#   script:
-#     - npm ci
-#     - npx vitest run --coverage
-
-# ===== Go 模板 =====
-# smoke:
-#   stage: smoke
-#   image: golang:1.22-alpine
-#   script:
-#     - go vet ./...
-#     - go build ./...
-#
-# test:
-#   stage: test
-#   needs: [smoke]
-#   image: golang:1.22
-#   parallel:
-#     matrix:
-#       - GO_VERSION: ["1.21", "1.22", "1.23"]
-#   cache:
-#     key: ${CI_COMMIT_REF_SLUG}
-#     paths:
-#       - /go/pkg/mod
-#   script:
-#     - go test ./... -race -coverprofile=coverage.out -covermode=atomic
+# Adaptation rules:
+# - Pin a real image per package/runtime; a declared matrix variable must control the image.
+# - Prefer tracked lockfiles; otherwise bind cache to the manifest and report the risk.
+# - Keep package jobs independent. Never mask install failure with a fallback command.
+# - Add coverage_report only when the generated format and path are real.
+# - Add Slack/other webhooks only with existing protected variables or explicit authorization.
+# - Validate the generated YAML and ensure no __TOKEN__ remains.

@@ -1,11 +1,18 @@
-# 断点恢复
+---
+work_id:
+mode: quick | standard | review | hotfix
+step: reproduce | diagnose | fix | verify | report
+strikes: 3
+perspective: data-flow | call-chain | config | timing
+blocked_at:
+---
 
-<!-- 3-Strike硬停时写入，恢复后自动删除 -->
+# 恢复点
 
-- slug: 
-- mode: Trivial | Quick | Standard | Explore | Hotfix
-- step: 诊断(1.1/1.2/1.3) | 修复(4/5/6) | 验证(7/8/9/10)
-- strikes: 1 | 2 | 3
-- perspective: 数据流 | 调用链 | 时序
-- hypotheses: 
-- notes: 
+## 已验证事实
+
+## 已排除假设
+
+## 待验证假设
+
+## 恢复命令
