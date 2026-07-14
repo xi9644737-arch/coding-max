@@ -1,6 +1,6 @@
 # 贡献指南
 
-`coding-max` 是纯文本方法论，不像代码项目有构建/测试流程。贡献方式很简单：
+本项目以 Markdown/YAML 为主，但公开契约、引用完整性、模板和体积预算都有自动化测试。
 
 ## 提 Issue
 
@@ -10,13 +10,16 @@
 ## 提 Pull Request
 
 1. Fork 本仓库
-2. 在 `SKILL.md` 中修改或新增内容
-3. 确保改动符合 skill 自身的原则（是的，用 coding-max 审 coding-max）
-4. 更新 `CHANGELOG.md`
-5. 提交 PR 并说明改了什么、为什么
+2. 入口只保留触发、路由和硬约束；详细方法优先放入按需 `references/`
+3. 更新相关测试、示例、`CHANGELOG.md` 和 `VERSION`（发布变更时）
+4. 运行 `python -m unittest discover -s tests -v`
+5. 用 `coding-max` Review 终审改动并清理临时调试内容
+6. 提交 PR，说明改动、验证结果和剩余风险
 
 ## 风格
 
 - 保持中文，保持压缩
-- 每个约束都经得起 5 Whys 追问
+- 不重复解释模型已具备的常识
+- 每个硬约束都应可执行、可验证
+- 保持渐进式披露与现有体积预算
 - 不引入平台绑定

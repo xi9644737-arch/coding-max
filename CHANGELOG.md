@@ -1,42 +1,37 @@
 # Changelog
 
-## [1.0.2] - 2026-07-12
+> 自 `v0.1.3beta` 起重新建立 Beta 版本线。仓库既有 `v1.0.0`、`v1.0.2`、`v2.0.0` 标签作为早期历史快照保留，不移动、不覆盖。
 
-### coding-max — 精炼
+## [0.1.3beta] - 2026-07-15
 
-- **三层结构**: 铁律(Always-On) → 模式路由(5模式) → 3阶段流程(诊断→修复→验证)
-- **5条铁律**置于文件最前
-- **2个人机检查点**: CP1诊断确认 + CP2方案确认 (Standard模式)
-- **并行诊断**: Standard从3视角(数据流/调用链/时序)并行扫描
-- **插桩策略具体化**: `[BUG-TRACE]` 格式(时间戳+线程ID+状态变量+预期vs实际)
-- 流程精简: 从11步合并为10步，消除碎片编号，步骤名语义化
-- 自欺红旗与铁律1联动
-- 修复悬空引用(Complex)、统一术语、精简冗余
+### coding-max
 
-### coding-pipeline — 精炼
+- 新增按需高级诊断层：反向数据流溯源、偶现分类、不可信诊断输入、性能与资源路由。
+- 明确 origin 与传播点的区别，要求证明契约首次被破坏的位置。
+- 保持单 Agent 与平台无关，不绑定特定模型、宿主产品或工具协议。
+- `SKILL.md` 保持轻量，并新增 4 KiB 入口体积契约。
 
-- **5语言一等支持**: Python/Node/Go/Rust/Java，各含Phase1+CI模板
-- **冒烟加深**: Phase1加裸catch检查+导入可解析性+`__init__.py`检查
-- **CI模板生产级**: `actions/cache@v4`+`codecov/codecov-action@v4`+Slack通知模板
-- Pre-commit主动探测`.pre-commit-config.yaml`+追加变更模块测试
-- 新增 `github-actions-ci-template.yml`(5语言完整示例+缓存+Codecov+Slack)
-- 疫苗映射表扩展至7语言
-- 必含要素和硬约束改为清晰列表
+### 文档与验证
 
-### 修复
+- 同步 README、贡献指南和全部示例到当前 Explore/Review/Quick/Standard/Hotfix 工作流。
+- 新增机器可读 `VERSION`，并以契约测试防止版本与公开文档漂移。
+- 继续使用 Bug、Review、Pipeline 报告及索引闭环；本地项目记忆不进入发布包。
 
-- SDO 反模式: description 从工作流摘要改为纯触发条件
-- Hotfix 保留冲击波分析
-- Trivial 快速通道: 拼写/注释/格式化变更不再误升 Moderate
-- 硬约束去语言专属化
+## 历史快照
 
----
+### [2.0.0] - 2026-07-12
 
-## [1.0.0] - 2026-07-12
+- 从单一 `coding-max` 扩展为 `coding-max` + `coding-pipeline` 双 Skill。
+- 新增测试荒漠审计、测试框架建立、CI 模板和 PHASE 联动原型。
 
-### 新增
-- 4种模式: Explore/Quick/Standard/Hotfix
-- 9步根因修复流程 + 10条硬约束 + 7个自欺红旗
-- 项目记忆体系: 病历索引、项目画像、断点恢复
-- patch-signals + bug-memory-format 参考文件
-- 无测试项目的环境探测与手动验证降级路径
+### [1.0.2] - 2026-07-12
+
+- 精炼根因修复流程、模式路由、TDD、自审、插桩和 Hotfix 约束。
+- 扩充 Python、Node.js、Go、Rust、Java 的测试与 CI 参考。
+- 修复 description 泄露内部工作流、合法语法误判和悬空引用。
+
+### [1.0.0] - 2026-07-12
+
+- 初始发布 `coding-max`。
+- 提供 Explore、Quick、Standard、Hotfix 修复模式。
+- 引入 RED→GREEN、根因分析、项目病历和断点恢复工作流。

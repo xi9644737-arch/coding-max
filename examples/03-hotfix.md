@@ -13,12 +13,12 @@
 - 5 Whys: 定位 `payment/callback.py:89`，上游支付网关改了回调字段名 `trade_no`→`transaction_id`
 
 **修复:**
-- 冲击波: grep全仓 → `payment/callback.py`(2处) + `order/confirm.py`(1跳间接依赖)，无共享状态
-- TDD: RED(测试新字段名→500✓) → GREEN(兼容新旧字段名) → 跳过REFACTOR
+- 先用新字段回调取得 RED，再做兼容新旧字段名的最小止血
+- 扫描所有回调消费者和签名校验，确认字段归一化位于拥有外部契约的边界
 
 **验证:**
-- 三层自检: 反事实✓(revert→500重现)
-- `[HOTFIX]` 前缀 + 事后待补: 疫苗(字段变更监控) + 胶囊(记录弯路)
+- 复现、相关测试和反事实通过后恢复服务
+- 事后补全 `[HOTFIX]` 病历、回滚说明、监控疫苗与 Review
 
 ## AI 输出
 
@@ -28,8 +28,8 @@ trade_id = data.get("transaction_id") or data.get("trade_no")
 ```
 
 ```
-[HOTFIX] 2026-07-12 · 支付回调字段名变更
+[HOTFIX] .project-memory/bugs/BUG-YYYY-MM-DD-payment-callback-field.md
 - 根因: 上游支付网关字段重命名，未同步通知
 - 修复: 兼容 transaction_id 和 trade_no 双字段
-- 事后待补: 疫苗(接入字段变更监控)、胶囊
+- 状态: resolved；终审和临时 trace 清理完成
 ```

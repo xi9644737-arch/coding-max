@@ -29,6 +29,12 @@ def frontmatter(text: str) -> dict[str, str]:
 
 
 class SkillContractTests(unittest.TestCase):
+    def test_public_version_is_consistent(self) -> None:
+        version = read("VERSION").strip()
+        self.assertEqual(version, "0.1.3beta")
+        self.assertIn(f"v{version}", read("README.md"))
+        self.assertIn(f"[{version}]", read("CHANGELOG.md"))
+
     def test_required_frontmatter_and_names(self) -> None:
         for name in ("coding-max", "coding-pipeline"):
             metadata = frontmatter(read(f"{name}/SKILL.md"))
