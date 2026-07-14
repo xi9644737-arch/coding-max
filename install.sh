@@ -14,6 +14,7 @@ cleanup() { rm -rf -- "$TMP"; }
 trap cleanup EXIT
 
 git clone --depth 1 "$REPO" "$TMP"
+version="$(tr -d '\r\n' < "$TMP/VERSION")"
 mkdir -p "$SKILLS_DIR"
 backup_root="$(dirname "$SKILLS_DIR")/.skill-backups/$(date +%Y%m%d-%H%M%S)"
 
@@ -25,5 +26,5 @@ for name in coding-max coding-pipeline; do
     rm -rf -- "$target"
   fi
   cp -R "$TMP/$name" "$target"
-  echo "Installed: $target"
+  echo "Installed $name ($version): $target"
 done

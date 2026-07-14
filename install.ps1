@@ -10,6 +10,7 @@ $skills = [System.IO.Path]::GetFullPath($Destination)
 
 try {
     git clone --depth 1 $repo $tmp | Out-Null
+    $version = (Get-Content -Raw -LiteralPath (Join-Path $tmp "VERSION")).Trim()
     New-Item -ItemType Directory -Force -Path $skills | Out-Null
     $backupRoot = Join-Path (Split-Path -Parent $skills) (".skill-backups\" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
@@ -21,7 +22,7 @@ try {
             Remove-Item -Recurse -Force -LiteralPath $target
         }
         Copy-Item -Recurse -Force -LiteralPath (Join-Path $tmp $name) -Destination $target
-        Write-Host "Installed: $target" -ForegroundColor Green
+        Write-Host "Installed $name ($version): $target" -ForegroundColor Green
     }
 }
 finally {
