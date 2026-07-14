@@ -1,37 +1,38 @@
 # Changelog
 
-> 自 `v0.1.3beta` 起重新建立 Beta 版本线。仓库既有 `v1.0.0`、`v1.0.2`、`v2.0.0` 标签作为早期历史快照保留，不移动、不覆盖。
+> A new Beta release line starts at `v0.1.3beta`. Existing `v1.0.0`, `v1.0.2`, and `v2.0.0` tags remain immutable early-history snapshots.
 
 ## [0.1.3beta] - 2026-07-15
 
 ### coding-max
 
-- 新增按需高级诊断层：反向数据流溯源、偶现分类、不可信诊断输入、性能与资源路由。
-- 明确 origin 与传播点的区别，要求证明契约首次被破坏的位置。
-- 保持单 Agent 与平台无关，不绑定特定模型、宿主产品或工具协议。
-- `SKILL.md` 保持轻量，并新增 4 KiB 入口体积契约。
+- Added a conditionally loaded advanced-diagnostics layer for backward data-flow tracing, flaky-failure classification, untrusted diagnostic input, and performance/resource routing.
+- Distinguished the first broken contract (origin) from later propagation points.
+- Preserved single-agent, host-neutral execution without model or tool-protocol dependencies.
+- Added a 4 KiB contract for the main `SKILL.md` router.
 
-### 文档与验证
+### Distribution and evidence
 
-- 同步 README、贡献指南和全部示例到当前 Explore/Review/Quick/Standard/Hotfix 工作流。
-- 新增机器可读 `VERSION`，并以契约测试防止版本与公开文档漂移。
-- 继续使用 Bug、Review、Pipeline 报告及索引闭环；本地项目记忆不进入发布包。
+- Rebuilt the public documentation and examples around the current Explore, Review, Quick, Standard, and Hotfix workflows.
+- Added a machine-readable `VERSION` and release-consistency tests.
+- Added an English discovery surface, universal Skills CLI installation, scenario evidence, and an explicit evaluation boundary.
+- Kept local Bug, Review, and Pipeline records out of the published package.
 
-## 历史快照
+## Historical snapshots
 
 ### [2.0.0] - 2026-07-12
 
-- 从单一 `coding-max` 扩展为 `coding-max` + `coding-pipeline` 双 Skill。
-- 新增测试荒漠审计、测试框架建立、CI 模板和 PHASE 联动原型。
+- Expanded the original single skill into the `coding-max` + `coding-pipeline` pair.
+- Added early test-infrastructure, CI-template, and PHASE handoff workflows.
 
 ### [1.0.2] - 2026-07-12
 
-- 精炼根因修复流程、模式路由、TDD、自审、插桩和 Hotfix 约束。
-- 扩充 Python、Node.js、Go、Rust、Java 的测试与 CI 参考。
-- 修复 description 泄露内部工作流、合法语法误判和悬空引用。
+- Refined root-cause analysis, routing, TDD, review, instrumentation, and Hotfix constraints.
+- Expanded Python, Node.js, Go, Rust, and Java test/CI guidance.
+- Fixed workflow leakage in discovery metadata, legal-syntax false positives, and dangling references.
 
 ### [1.0.0] - 2026-07-12
 
-- 初始发布 `coding-max`。
-- 提供 Explore、Quick、Standard、Hotfix 修复模式。
-- 引入 RED→GREEN、根因分析、项目病历和断点恢复工作流。
+- Initial `coding-max` release.
+- Introduced Explore, Quick, Standard, and Hotfix modes.
+- Added RED/GREEN repair, project Bug records, and recovery checkpoints.

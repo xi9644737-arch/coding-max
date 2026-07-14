@@ -1,6 +1,6 @@
 ---
 name: coding-max
-description: 修复软件缺陷、排查异常、定位根因、处理 hotfix、验证修复，或在实现完成后审查代码并修复确认的问题。用户提到修 bug、fix、debug、报错、崩溃、线上故障、根因分析、代码审查、质量检查或验证修复时使用。
+description: Diagnose and repair software defects, trace root causes, handle hotfixes, verify fixes, and review completed implementations. Use for bugs, errors, crashes, production incidents, root-cause analysis, code review, quality audits, or regression-safe repair.
 ---
 
 # coding-max

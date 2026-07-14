@@ -1,26 +1,17 @@
 # monorepo-no-tests
 
-测试 `coding-pipeline` + `coding-max` 联动的 Monorepo。
+A Python/Node.js Monorepo fixture for evaluating the `coding-pipeline` to `coding-max` handoff. It contains partial smoke checks but no trustworthy end-to-end verification path for the target behavior.
 
-## 结构
-
-```
+```text
 packages/
-├── api/     Python/FastAPI  → 无测试, 无 CI
-└── web/     Node.js/Next.js → 无测试, 无 CI
+├── api/    Python/FastAPI
+└── web/    Node.js
 ```
 
-## 测试方式
+## Evaluation prompt
 
-复制到你的项目目录，对 AI 说：
+Copy the fixture to an isolated workspace and ask:
 
-> "这个项目有个 bug，packages/api 的 /users 接口没有做参数校验"
+> The `packages/api` users endpoint lacks input validation. Establish a trustworthy test and CI path, then repair and verify the defect.
 
-观察：
-1. coding-max 步骤 0.0 是否拦截"无测试"
-2. 是否提示启动 coding-pipeline
-3. coding-pipeline 是否递归扫描到两个子包
-4. 是否生成两个独立的 CI job
-5. 是否生成语法树冒烟测试（不实际 import FastAPI/React）
-6. PHASE 锁是否正常写入和清除
-7. 回 coding-max 后步骤 6 是否从降级→正常
+The run should discover both subprojects, reuse existing pieces, avoid fabricated coverage, maintain PHASE state, produce separate verification paths, and return control to `coding-max`. Use [`EVALUATION.md`](../../EVALUATION.md) as the scoring rubric.

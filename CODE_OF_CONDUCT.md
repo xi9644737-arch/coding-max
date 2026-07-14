@@ -1,31 +1,26 @@
-# 行为准则
+# Code of Conduct
 
-## 我们的承诺
+## Our pledge
 
-为了营造一个开放和友好的环境，我们承诺尊重所有参与者，不论其经验水平、性别、性取向、残疾、外貌、体型、种族或宗教信仰。
+We pledge to make participation in this project a respectful and harassment-free experience for everyone, regardless of experience, identity, disability, appearance, background, or belief.
 
-## 我们的标准
+## Expected behavior
 
-**鼓励的行为：**
-- 使用友好和包容的语言
-- 尊重不同的观点和经验
-- 优雅地接受建设性批评
-- 关注对社区最有利的事情
+- Use welcoming and inclusive language.
+- Respect different viewpoints and experiences.
+- Accept constructive criticism gracefully.
+- Focus on what is best for the project and its community.
 
-**不可接受的行为：**
-- 人身攻击或政治攻击
-- 公开或私下骚扰
-- 未经明确许可发布他人的私人信息
-- 其他在专业环境中被合理认为不恰当的行为
+## Unacceptable behavior
 
-## 适用范围
+- Personal attacks, harassment, or intimidation.
+- Publishing another person's private information without explicit permission.
+- Disruptive conduct that would reasonably be considered inappropriate in a professional setting.
 
-本行为准则适用于所有项目空间以及个人代表项目或其社区的公共空间。
+## Scope and enforcement
 
-## 执行
+This code applies in project spaces and when an individual publicly represents the project. Report unacceptable behavior to the maintainers through an appropriate private channel. Reports will be reviewed fairly and confidentially, and maintainers may remove, edit, or reject contributions or participation that violate this code.
 
-可通过 GitHub Issues 向维护者举报不可接受的行为。所有投诉将被审查和调查，并在必要时采取适当行动。维护者有义务对举报人信息保密。
+## Attribution
 
-## 归属
-
-本行为准则改编自 [Contributor Covenant](https://www.contributor-covenant.org)，版本 2.1。
+Adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.

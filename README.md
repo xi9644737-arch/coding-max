@@ -1,112 +1,143 @@
 # coding-max + coding-pipeline
 
-> 单 Agent、平台无关的缺陷修复与测试基建 Skills。
+> Vendor-neutral Agent Skills for root-cause debugging, regression-safe fixes, code review, and test/CI infrastructure recovery.
 
 <p align="center">
   <img alt="Version" src="https://img.shields.io/badge/version-v0.1.3beta-orange">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
-  <img alt="Format" src="https://img.shields.io/badge/format-Agent%20Skills-lightgrey">
   <img alt="Skills" src="https://img.shields.io/badge/skills-2-brightgreen">
+  <a href="https://skills.sh/xi9644737-arch/coding-max"><img alt="skills.sh installs" src="https://skills.sh/b/xi9644737-arch/coding-max"></a>
 </p>
 
-`coding-max` 用证据定位根因，以回归测试约束修复，并把实际改动沉淀为可检索病历；`coding-pipeline` 在测试荒漠中建立最小、可运行、可验证的测试与 CI 基建。
+Most debugging prompts stop at “the tests pass.” This package goes further: it finds the first broken contract, proves the fix with a regression, reviews the resulting diff, cleans temporary diagnostics, and records the result so the same failure is easier to solve next time.
 
-两者不依赖特定模型、宿主产品、MCP 或多 Agent 编排。`SKILL.md` 只承担触发、路由和硬约束，详细流程按需从 `references/` 加载。
+`coding-max` is the primary product. When a valuable codebase has no trustworthy test path, its lightweight companion `coding-pipeline` builds or repairs that path, then returns control so `coding-max` can close the bug safely.
 
-## 适用场景
+## Core skill and verification companion
 
-`coding-max` 尤其适合长期维护的中大型项目：
+| Role | Skill | Job |
+|---|---|---|
+| Core maintenance skill | `coding-max` | Diagnose, repair, verify, review, and retain defect knowledge in high-value codebases |
+| Conditional safety net | `coding-pipeline` | Restore tests, CI, coverage, and pre-commit only when reliable verification is missing |
 
-- 调用链深、跨模块契约或数据流复杂；
-- 偶现、并发、状态污染、缓存、性能或资源问题；
-- 存在历史基线失败，需要区分本次回归；
-- Bug 可能重复发生，需要病历、索引和恢复点；
-- 实现完成后需要基于 diff 的质量终审。
+They coordinate through `.project-memory/PHASE.json` only when pipeline work is required. `coding-pipeline` deliberately returns control instead of expanding into a general Agent Harness.
 
-小型修复走 Quick；只排查不修改走 Explore；线上紧急问题走 Hotfix；多模块或高风险问题走 Standard；已有实现直接走 Review。
+## Quick install
 
-## 核心闭环
+Install both skills with the universal Skills CLI:
 
-```text
-复现与 RED 证据
-    → 根因与影响面
-    → 最小修复（GREEN）
-    → 相关验证与反事实
-    → Review 终审
-    → 清理临时 trace
-    → Bug/Review 报告与索引关闭
+```bash
+npx skills add xi9644737-arch/coding-max -g --skill coding-max coding-pipeline
 ```
 
-高级场景按需启用：
-
-- 从失败点逆着真实数据流追到首次破坏契约的位置；
-- 按 timing、environment、state、randomness、external 分类偶现问题；
-- 把日志、堆栈、Issue 和外部响应视为不可信证据；
-- 按 CPU、内存、并发、I/O、网络和泄漏选择最小观测面。
-
-连续三次当前修复失败时写恢复点并停止；无测试且风险不低时，通过 `.project-memory/PHASE.json` 交给 `coding-pipeline` 建立安全网。
-
-## 渐进式披露
-
-```text
-metadata                 始终可见：只负责触发
-└── SKILL.md             触发后加载：模式、边界、完成条件、硬约束
-    └── references/      场景命中才加载：修复、终审、高级诊断、病历格式
-```
-
-契约测试限制 `coding-max/SKILL.md` 不超过 4 KiB，并限制两个 Skill 的总包预算，防止功能增加导致入口持续膨胀。
-
-## coding-pipeline
-
-```text
-项目审计 → 复用或建立最小测试框架 → 分层预检
-        → CI/缓存/覆盖率基线 → 本地或远程验证分级 → Pipeline 报告
-```
-
-支持 Python、Node.js、Go、Rust、Java 和通用命令；支持 Monorepo、GitHub Actions、GitLab CI 与通用 CI 模板。覆盖率只记录真实测量值，不估算，不以伪测试抬高数字。
-
-## 安装
+Or install to an explicit Agent Skills directory without guessing the host:
 
 ```bash
 git clone https://github.com/xi9644737-arch/coding-max.git
-
-# 目标必须是宿主实际使用的 skills 目录
 ./coding-max/install.sh /absolute/path/to/skills
 
 # Windows PowerShell
 # .\coding-max\install.ps1 -Destination C:\absolute\path\to\skills
 ```
 
-安装脚本不猜测宿主路径；替换同名 Skill 前会自动备份。
+The repository is discoverable as two independent `SKILL.md` packages. The custom installers back up existing copies before replacement.
 
-## 文件结构
+## Where coding-max fits
+
+`coding-max` is designed for long-lived codebases where the cost of a wrong fix is higher than the cost of disciplined diagnosis:
+
+- deep call chains and cross-module contracts;
+- intermittent, concurrent, stateful, cache, performance, or resource failures;
+- repositories with unrelated baseline failures;
+- recurring defect patterns that should become searchable project knowledge;
+- completed implementations that need a behavior-focused final review.
+
+Modes stay proportional to risk: Explore, Review, Quick, Standard, and Hotfix.
 
 ```text
-├── VERSION
+Reproduce / RED evidence
+  -> root cause and blast radius
+  -> minimal GREEN fix
+  -> focused verification and counterfactual
+  -> final Review
+  -> diagnostic cleanup
+  -> closed Bug/Review report and index
+```
+
+Advanced diagnosis is loaded only when needed:
+
+- trace a bad value backward to the first broken contract;
+- classify flaky failures as timing, environment, state, randomness, or external;
+- treat logs, stack traces, issues, and external responses as untrusted evidence;
+- route CPU, memory, concurrency, I/O, network, and leak investigations to the smallest useful observation surface.
+
+## Where coding-pipeline fits
+
+`coding-pipeline` targets the gap between “this project has a bug” and “this project can prove a fix.”
+
+```text
+Audit project and subprojects
+  -> reuse or add the smallest native test framework
+  -> run layered preflight checks
+  -> establish a measured baseline
+  -> configure CI, cache, and coverage artifacts
+  -> return verification control to coding-max
+```
+
+It supports Python, Node.js, Go, Rust, Java, generic commands, Monorepos, GitHub Actions, GitLab CI, and provider-neutral CI templates. Coverage is measured or reported as `unknown`; it is never estimated.
+
+## Progressive disclosure
+
+```text
+metadata                 always visible: discovery only
+└── SKILL.md             loaded on activation: routing and hard constraints
+    └── references/      loaded conditionally: workflows, diagnostics, formats
+```
+
+Contract tests cap `coding-max/SKILL.md` at 4 KiB and enforce total package budgets. New capabilities belong in conditional references instead of inflating the always-loaded prompt.
+
+## Evidence, not marketing claims
+
+The repository ships deterministic contract tests and two scenario fixtures:
+
+- `test-fixtures/buggy-python`: root-cause and review behavior against planted defects;
+- `test-fixtures/monorepo-no-tests`: test-infrastructure recovery across Python and Node.js subprojects.
+
+Run the automated checks:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+See [`EVALUATION.md`](EVALUATION.md) for what is currently proven, what remains scenario-based, and the rubric for future model-level comparisons.
+
+## Repository layout
+
+```text
 ├── coding-max/
 │   ├── SKILL.md
 │   ├── references/
-│   │   ├── repair-workflow.md
-│   │   ├── advanced-debugging.md
-│   │   ├── patch-signals.md
-│   │   └── bug-memory-format.md
 │   └── memory-template/
 ├── coding-pipeline/
 │   ├── SKILL.md
 │   └── references/
 ├── examples/
 ├── test-fixtures/
-└── tests/test_skill_contracts.py
+├── tests/test_skill_contracts.py
+├── EVALUATION.md
+└── VERSION
 ```
 
-## 验证
+## Design boundaries
 
-```bash
-python -m unittest discover -s tests -v
-```
+- Single-agent execution: no delegated agent is required.
+- Host-neutral source: no model, vendor, IDE, MCP server, or plugin is required.
+- No fabricated evidence: commands, test results, coverage, and CI status must be observed.
+- No debug residue: temporary traces, dumps, logs, and recovery files are removed at closeout.
+- No repository pollution: local project memory is ignored by this source repository.
 
-更多使用方式见 [`examples/`](examples/)，版本变化见 [`CHANGELOG.md`](CHANGELOG.md)。
+See [`examples/`](examples/) for usage and [`CHANGELOG.md`](CHANGELOG.md) for release history.
 
-## 许可证
+## License
 
 MIT © 2026

@@ -15,11 +15,11 @@ def read(relative: str) -> str:
 def frontmatter(text: str) -> dict[str, str]:
     lines = text.splitlines()
     if not lines or lines[0] != "---":
-        raise AssertionError("SKILL.md 缺少 YAML frontmatter")
+        raise AssertionError("SKILL.md is missing YAML frontmatter")
     try:
         end = lines.index("---", 1)
     except ValueError as exc:
-        raise AssertionError("SKILL.md frontmatter 未闭合") from exc
+        raise AssertionError("SKILL.md frontmatter is not closed") from exc
     result: dict[str, str] = {}
     for line in lines[1:end]:
         key, separator, value = line.partition(":")
@@ -29,11 +29,42 @@ def frontmatter(text: str) -> dict[str, str]:
 
 
 class SkillContractTests(unittest.TestCase):
+    def test_public_surfaces_are_english(self) -> None:
+        files = [
+            ROOT / name
+            for name in (
+                "README.md",
+                "CHANGELOG.md",
+                "CONTRIBUTING.md",
+                "CODE_OF_CONDUCT.md",
+                "SECURITY.md",
+                "EVALUATION.md",
+            )
+        ]
+        files.extend((ROOT / ".github" / "release-notes").glob("*.md"))
+        text_suffixes = {".md", ".py", ".ts", ".json", ".toml"}
+        files.extend(
+            path
+            for folder in ("examples", "test-fixtures")
+            for path in (ROOT / folder).rglob("*")
+            if path.is_file() and path.suffix in text_suffixes and "node_modules" not in path.parts
+        )
+        for path in files:
+            content = path.read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"[\u3400-\u9fff]", content), f"Non-English text in {path.relative_to(ROOT)}")
+
     def test_public_version_is_consistent(self) -> None:
         version = read("VERSION").strip()
         self.assertEqual(version, "0.1.3beta")
         self.assertIn(f"v{version}", read("README.md"))
         self.assertIn(f"[{version}]", read("CHANGELOG.md"))
+        self.assertIn("npx skills add xi9644737-arch/coding-max", read("README.md"))
+        self.assertIn("EVALUATION.md", read("README.md"))
+        release_notes = ROOT / ".github" / "release-notes" / f"v{version}.md"
+        self.assertTrue(release_notes.exists(), f"Missing release notes for v{version}")
+        release_workflow = read(".github/workflows/publish-release.yml")
+        self.assertIn("gh release create", release_workflow)
+        self.assertIn("--verify-tag", release_workflow)
 
     def test_required_frontmatter_and_names(self) -> None:
         for name in ("coding-max", "coding-pipeline"):
@@ -46,11 +77,11 @@ class SkillContractTests(unittest.TestCase):
         for name in ("coding-max", "coding-pipeline"):
             body = read(f"{name}/SKILL.md")
             references = re.findall(r"`((?:references|memory-template)/[^`]+)`", body)
-            self.assertTrue(references, f"{name} 没有声明按需资源")
+            self.assertTrue(references, f"{name} declares no conditional resources")
             for relative in references:
                 self.assertTrue(
                     (ROOT / name / relative).exists(),
-                    f"{name} 引用了不存在的 {relative}",
+                    f"{name} references missing resource {relative}",
                 )
 
     def test_shared_phase_protocol_is_canonical(self) -> None:
@@ -107,11 +138,11 @@ class SkillContractTests(unittest.TestCase):
         budgets = {"coding-max": 18_000, "coding-pipeline": 22_000}
         for name, budget in budgets.items():
             total = sum(path.stat().st_size for path in (ROOT / name).rglob("*") if path.is_file())
-            self.assertLessEqual(total, budget, f"{name} 体积 {total} 超过 {budget}")
+            self.assertLessEqual(total, budget, f"{name} size {total} exceeds {budget}")
         self.assertLessEqual(
             (ROOT / "coding-max" / "SKILL.md").stat().st_size,
             4_096,
-            "coding-max/SKILL.md 超过 4 KiB，详细能力应移入按需资源",
+            "coding-max/SKILL.md exceeds 4 KiB; move details into conditional resources",
         )
 
     def test_installer_requires_explicit_destination(self) -> None:

@@ -1,25 +1,25 @@
-# 贡献指南
+# Contributing
 
-本项目以 Markdown/YAML 为主，但公开契约、引用完整性、模板和体积预算都有自动化测试。
+This repository is mostly Markdown and YAML, but its public contracts, references, templates, and size budgets are covered by automated tests.
 
-## 提 Issue
+## Issues
 
-- Bug 报告：哪个步骤产生了错误行为？附上具体场景
-- 功能建议：你觉得缺了什么？为什么需要？
+- Bug report: identify the workflow step that produced incorrect behavior and include a concrete scenario.
+- Feature request: explain the missing capability, why it belongs here, and how it can stay progressively disclosed.
 
-## 提 Pull Request
+## Pull requests
 
-1. Fork 本仓库
-2. 入口只保留触发、路由和硬约束；详细方法优先放入按需 `references/`
-3. 更新相关测试、示例、`CHANGELOG.md` 和 `VERSION`（发布变更时）
-4. 运行 `python -m unittest discover -s tests -v`
-5. 用 `coding-max` Review 终审改动并清理临时调试内容
-6. 提交 PR，说明改动、验证结果和剩余风险
+1. Fork the repository.
+2. Keep discovery, routing, and hard constraints in `SKILL.md`; place detailed methods in conditional `references/`.
+3. Update relevant tests, examples, `CHANGELOG.md`, and `VERSION` for release changes.
+4. Run `python -m unittest discover -s tests -v`.
+5. Perform a final `coding-max` Review and remove temporary diagnostics.
+6. Describe the change, evidence, compatibility impact, and remaining risk in the pull request.
 
-## 风格
+## Style
 
-- 保持中文，保持压缩
-- 不重复解释模型已具备的常识
-- 每个硬约束都应可执行、可验证
-- 保持渐进式披露与现有体积预算
-- 不引入平台绑定
+- Keep instructions compact and executable.
+- Do not restate knowledge a capable model already has.
+- Every hard constraint should be testable or produce inspectable evidence.
+- Preserve progressive disclosure and current package budgets.
+- Do not add model, vendor, IDE, MCP, plugin, or agent-orchestration dependencies.

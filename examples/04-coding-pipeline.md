@@ -1,28 +1,28 @@
-# 示例: coding-pipeline — Monorepo 搭测试管道
+# Example: coding-pipeline — restoring a Monorepo test path
 
-## 场景
+## Scenario
 
-Monorepo 包含 `packages/web`（Node.js）和 `packages/api`（Python），两者都没有可运行测试。`coding-max` 判断风险不低，在 `.project-memory/PHASE.json` 写入 `bootstrapping` 后交给 `coding-pipeline`。
+A Monorepo contains `packages/web` (Node.js) and `packages/api` (Python), but neither has a trustworthy test path. `coding-max` records `bootstrapping` in `.project-memory/PHASE.json` and hands verification setup to `coding-pipeline`.
 
-## 执行
+## Expected workflow
 
-1. 审计根目录和每个子包的 manifest、锁文件、既有测试、CI 与命令。
-2. 先验证仓库自带命令；缺失时为每个子包选择一个最小原生测试框架。
-3. 使用 `references/smoke-templates.md` 做无需依赖或低成本预检，不复制过时正则。
-4. 相关依赖获授权且锁版本后，运行真实测试并取得可重复基线。
-5. 根据目标平台选择 GitHub Actions、GitLab CI 或通用模板；Monorepo 用矩阵覆盖子项目和工具链版本。
-6. 只记录真实测得的覆盖率；无法测量写 `unknown`。
-7. 写 Pipeline 报告与索引，将 `PHASE.json` 更新为 `testing`，交回 `coding-max` 完成修复验证。
+1. Audit root and subproject manifests, lock files, existing tests, CI, and documented commands.
+2. Verify repository-native commands first; add the smallest native framework only when required.
+3. Use low-cost preflight checks without copying stale regexes from examples.
+4. With authorization, install locked dependencies and obtain a reproducible local baseline.
+5. Choose GitHub Actions, GitLab CI, or a provider-neutral template; use a matrix for subprojects and supported toolchains.
+6. Record measured coverage or `unknown`, never an estimate.
+7. Write the Pipeline report and index, set PHASE to `testing`, and return control to `coding-max`.
 
-## 输出摘要
+## Example output
 
 ```text
-测试基建已可运行：
-- packages/web：测试命令与 CI job 已验证
-- packages/api：测试命令与 CI job 已验证
-- 覆盖率：记录真实输出；未测项为 unknown
-- PHASE：testing
-- 报告：.project-memory/pipelines/PIPELINE-YYYY-MM-DD-monorepo.md
+Verification infrastructure is operational:
+- packages/web: test command and CI job verified
+- packages/api: test command and CI job verified
+- Coverage: measured output recorded; unavailable values are unknown
+- PHASE: testing
+- Report: .project-memory/pipelines/PIPELINE-YYYY-MM-DD-monorepo.md
 
-coding-max 可继续执行回归测试和修复终审。
+coding-max can resume regression verification and final Review.
 ```

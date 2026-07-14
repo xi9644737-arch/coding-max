@@ -1,22 +1,19 @@
 # buggy-python
 
-测试 `coding-max` 用的 Python 项目，包含 3 个已知 bug，**无测试**。
+A small Python fixture for evaluating `coding-max`. It contains three planted defects and only a static smoke-test layer, not behavior regressions for the defects.
 
-## 种植的 Bug
+## Planted defects
 
-| # | 文件:行 | 类型 | 触发方式 |
-|---|---------|------|---------|
-| 1 | `app/main.py:17` | KeyError | 调用 `get_user(2)` — 用户缺 `email` 字段 |
-| 2 | `app/main.py:30` | 裸 except | 调用 `update_user(1, {"bad_field": ...})` — 异常被吞 |
-| 3 | `app/main.py:41` | 竞态条件 | `_cache` 全局变量无锁保护 |
+| # | Location | Type | Trigger |
+|---|---|---|---|
+| 1 | `app/main.py` | Contract/KeyError | Call `get_user(2)`; the legacy record has no `email` |
+| 2 | `app/main.py` | Swallowed exception | Exercise an update path that raises inside the broad handler |
+| 3 | `app/main.py` | Concurrency risk | Access the shared `_cache` from concurrent callers |
 
-## 测试方式
+## Evaluation prompt
 
-复制到你的项目目录，对 AI 说：
+Copy the fixture to an isolated workspace and ask:
 
-> "这个项目有个用户管理模块，帮我看看有没有 bug"
+> This user-management module has incorrect behavior. Diagnose and repair it with coding-max.
 
-观察 coding-max 是否能：
-1. 自动探测到 3 个 bug
-2. 走 Quick/Standard 流程
-3. 不自欺（比如只修 KeyError 不加 .get()，而是追踪同类模式）
+Score the run using [`EVALUATION.md`](../../EVALUATION.md). Do not count a run as successful merely because it finds all planted comments; the agent should reproduce behavior, trace the owning contract, add regressions, and close the reports.

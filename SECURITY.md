@@ -1,5 +1,7 @@
-# 安全策略
+# Security Policy
 
-本项目为纯 Markdown 方法论文档，**不包含可执行代码、不处理用户数据、不与外部服务通信**。因此不存在传统意义上的安全漏洞面。
+These skills can guide agents that have broad file-system and shell access, so instruction-level safety matters even though the package itself does not run a service or collect user data.
 
-如果你发现内容层面的问题（如误导性建议或逻辑漏洞），请通过 GitHub Issues 提交。
+Please report misleading instructions, prompt-injection exposure, unsafe command guidance, secret leakage, path-boundary failures, or supply-chain concerns through GitHub Issues. Do not include real credentials, private logs, or sensitive project data in a public report.
+
+For a vulnerability that should not be disclosed publicly, use GitHub's private vulnerability reporting feature when available.

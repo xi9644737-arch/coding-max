@@ -1,4 +1,4 @@
-"""冒烟测试 — 纯语法树检查，不实际 import FastAPI（避免启动服务器/连数据库/读配置导致 CI 崩溃）"""
+"""AST-only smoke checks; do not import FastAPI or start application side effects."""
 import ast
 import os
 
@@ -7,25 +7,25 @@ MAIN_PY = os.path.join(APP_DIR, "main.py")
 
 
 def test_entry_syntax():
-    """入口文件语法有效"""
+    """The entry module has valid syntax."""
     with open(MAIN_PY, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     assert tree is not None
 
 
 def test_no_bare_except():
-    """禁止裸 except: — coding-max 硬约束 #3"""
+    """Reject bare exception handlers."""
     with open(MAIN_PY, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler):
             assert node.type is not None, (
-                f"裸 except: 在行 {node.lineno} — 必须指定异常类型"
+                f"Bare except at line {node.lineno}; specify an exception type"
             )
 
 
 def test_routes_defined():
-    """FastAPI 路由装饰器存在"""
+    """At least one FastAPI route and the health endpoint exist."""
     with open(MAIN_PY, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     routes = []
@@ -33,19 +33,19 @@ def test_routes_defined():
         if isinstance(node, ast.Call) and hasattr(node.func, "attr"):
             if node.func.attr in ("get", "post", "put", "delete", "patch"):
                 routes.append(node.func.attr.upper())
-    assert len(routes) >= 1, "至少应定义 1 个路由"
-    # 验证已知路由
+    assert len(routes) >= 1, "Expected at least one route"
+    # Verify the known health route.
     route_paths = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and hasattr(node.func, "attr"):
             if node.func.attr in ("get", "post", "put", "delete", "patch"):
                 if node.args:
                     route_paths.add(node.args[0].value if isinstance(node.args[0], ast.Constant) else str(node.args[0]))
-    assert "/health" in route_paths, "缺少 /health 健康检查路由"
+    assert "/health" in route_paths, "Missing /health route"
 
 
 def test_no_mutable_default_args():
-    """禁止可变默认参数"""
+    """Reject mutable default arguments."""
     with open(MAIN_PY, encoding="utf-8") as f:
         tree = ast.parse(f.read())
     for node in ast.walk(tree):
@@ -53,5 +53,5 @@ def test_no_mutable_default_args():
             for default in node.args.defaults:
                 if isinstance(default, (ast.List, ast.Dict, ast.Set)):
                     raise AssertionError(
-                        f"函数 {node.name} 有可变默认参数 (行 {default.lineno})"
+                        f"Function {node.name} has a mutable default at line {default.lineno}"
                     )

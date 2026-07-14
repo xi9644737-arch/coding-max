@@ -1,14 +1,14 @@
-"""用户管理 API — 包含 3 个已知 bug 用于测试 coding-max"""
+"""User-management API with three planted defects for coding-max evaluation."""
 
 users_db = {
-    1: {"id": 1, "name": "张三", "email": "zhang@test.com"},
-    2: {"id": 2, "name": "李四"},  # BUG-1: 缺少 email 字段
-    3: {"id": 3, "name": "王五", "email": "wang@test.com"},
+    1: {"id": 1, "name": "Alice", "email": "alice@example.test"},
+    2: {"id": 2, "name": "Bob"},  # BUG-1: legacy record has no email field
+    3: {"id": 3, "name": "Casey", "email": "casey@example.test"},
 }
 
 
 def get_user(user_id: int) -> dict:
-    """获取用户信息"""
+    """Return a user record."""
     user = users_db.get(user_id)
     if not user:
         return {"error": "not found"}
@@ -16,12 +16,12 @@ def get_user(user_id: int) -> dict:
     return {
         "id": user["id"],
         "name": user["name"],
-        "email": user["email"],  # BUG-1: user[2] 没有 email → KeyError
+        "email": user["email"],  # BUG-1: user 2 raises KeyError
     }
 
 
 def update_user(user_id: int, data: dict) -> dict:
-    """更新用户信息 — BUG-2: 裸 except 吞异常"""
+    """Update a user — BUG-2: a bare except swallows failures."""
     user = users_db.get(user_id)
     if not user:
         return {"error": "not found"}
@@ -30,19 +30,19 @@ def update_user(user_id: int, data: dict) -> dict:
         user.update(data)
         users_db[user_id] = user
         return {"ok": True}
-    except:  # BUG-2: 裸 except，吞掉所有异常
-        pass  # 静默失败，调用方不知道发生了什么
+    except:  # BUG-2: catches and swallows every exception
+        pass  # The caller cannot observe the failure.
 
 
-# BUG-3: 全局变量当缓存，并发不安全
+# BUG-3: shared mutable cache without synchronization
 _cache: dict = {}
 
 
 def get_user_cached(user_id: int) -> dict:
-    """获取用户（带缓存）— BUG-3: 非线程安全"""
+    """Return a cached user — BUG-3: the cache path is not thread-safe."""
     if user_id in _cache:
         return _cache[user_id]
 
     result = get_user(user_id)
-    _cache[user_id] = result  # 竞态条件：读写之间有窗口
+    _cache[user_id] = result  # Race window between the read and write.
     return result

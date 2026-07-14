@@ -1,39 +1,44 @@
-# 示例: Quick 模式 — 常规 Bug 修复
+# Example: Quick mode — routine defect repair
 
-## 用户输入
+## User request
 
-> 用户列表接口偶尔返回 500，日志里是 `KeyError: 'display_name'`，帮我修一下。
+> The user-list endpoint intermittently returns 500 with `KeyError: 'display_name'`. Fix it.
 
-## AI 行为 (coding-max Quick 模式)
+## Expected coding-max behavior
 
-**模式路由** — 逻辑变更，单用户影响面 → Quick
+**Routing** — a localized behavior change with a bounded blast radius → Quick.
 
-**诊断:**
-- 搜病历并取得最小复现
-- 从 `KeyError` 反向追踪：失败点是 formatter，直接生产者是旧版用户记录的反序列化边界
-- 证明该边界首次违反“展示名可选、用户名必有”的领域契约；formatter 只是传播点
+**Diagnosis**
 
-**修复:**
-- 影响面：检索同一反序列化入口及所有消费者
-- TDD：RED（旧记录读取失败）→ GREEN（在拥有契约的边界归一化）→ REFACTOR（仅消除本次引入的重复）
+- Search existing Bug patterns and obtain a minimal reproduction.
+- Trace backward from the formatter failure to the legacy-record hydration boundary.
+- Prove that the boundary first violates the domain contract; the formatter is only a propagation point.
 
-**验证:**
-- 相关测试和反事实通过；全量结果与既有基线分开记录
-- 关闭 `.project-memory/bugs/BUG-...md` 并更新 `BUG_PATTERNS.md`
+**Repair**
 
-## AI 输出
+- Inspect the same hydration path and all consumers.
+- RED: a legacy record fails before the change.
+- GREEN: restore the contract at the boundary that owns it.
+- REFACTOR: remove only duplication introduced or exposed by this repair.
+
+**Verification**
+
+- Run the reproduction, focused regression, related consumer tests, and a counterfactual.
+- Report unrelated baseline failures separately.
+- Close `.project-memory/bugs/BUG-...md` and update `BUG_PATTERNS.md`.
+
+## Example output
 
 ```python
-# 用户记录读取边界 — 修复后
 def hydrate_user(record):
     user = dict(record)
     user["display_name"] = record.get("display_name") or record["username"]
     return user
 ```
 
-```
-已关闭: .project-memory/bugs/BUG-YYYY-MM-DD-display-name-contract.md
-- 根因: 旧记录进入领域模型时未执行兼容归一化
-- 修复: 在数据边界恢复 display_name 契约
-- 验证: 回归测试、相关消费者测试、反事实均通过
+```text
+Closed: .project-memory/bugs/BUG-YYYY-MM-DD-display-name-contract.md
+- Root cause: legacy records entered the domain model without compatibility normalization
+- Fix: restore the display_name contract at the data boundary
+- Evidence: regression, related consumers, and counterfactual passed
 ```

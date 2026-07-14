@@ -1,6 +1,6 @@
 ---
 name: coding-pipeline
-description: 为缺少测试或持续集成的项目建立、修复测试基础设施、CI、覆盖率基线与 pre-commit，并支持 Monorepo。用户提到搭测试、测试基建、配置 CI、GitHub Actions、GitLab CI、覆盖率、无测试、流水线失败或 coding-max 请求 bootstrap 时使用。
+description: Bootstrap or repair test infrastructure, CI, coverage baselines, and pre-commit for projects and Monorepos. Use when tests or CI are missing or broken, pipelines fail, coverage is unknown, or coding-max needs a trustworthy verification path.
 ---
 
 # coding-pipeline
