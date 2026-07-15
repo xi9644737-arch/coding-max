@@ -14,7 +14,7 @@ try {
     New-Item -ItemType Directory -Force -Path $skills | Out-Null
     $backupRoot = Join-Path (Split-Path -Parent $skills) (".skill-backups\" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
-    foreach ($name in @("coding-max", "coding-untangle", "coding-pipeline")) {
+    foreach ($name in @("coding-max", "coding-untangle", "coding-pipeline", "coding-tombstone")) {
         $target = Join-Path $skills $name
         if (Test-Path -LiteralPath $target) {
             New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null

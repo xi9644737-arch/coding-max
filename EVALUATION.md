@@ -16,16 +16,17 @@ The suite verifies:
 |---|---|
 | Discovery | Valid `name` and `description` frontmatter |
 | Progressive disclosure | Every declared direct reference exists |
-| Package size | Per-skill budgets, a 4 KiB `coding-max/SKILL.md` ceiling, and a 3 KiB `coding-untangle/SKILL.md` ceiling |
+| Package size | Per-skill budgets, 4/3/2.5 KiB ceilings for max/untangle/tombstone entrypoints, and a 50 KiB suite ceiling |
 | Repair closure | RED/GREEN, Bug report status, Review index, and report routing remain mandatory |
 | Advanced debugging | Backward tracing, flaky classification, untrusted evidence, and performance routing remain reachable on demand |
 | Structural handoff | `coding-max` owns Bug closure, `coding-untangle` owns safe structural migration, and `coding-pipeline` only enforces defined boundaries |
+| Retirement handoff | `coding-tombstone` owns evidence-backed retirement and Tombstone state, then returns final Review to `coding-max` |
 | Pipeline handoff | `coding-max` and `coding-pipeline` share the canonical `.project-memory/PHASE.json` protocol |
 | CI templates | Required images, matrices, and syntax guards stay intact |
 | Portability | Published skill directories contain no vendor-specific packaging |
 | Release consistency | `VERSION`, README, and CHANGELOG agree |
 
-All three skill folders are also checked with the reference Skill validator, while install scripts receive PowerShell and Bash syntax validation before release.
+All four skill folders are also checked with the reference Skill validator, while install scripts receive PowerShell and Bash syntax validation before release.
 
 ## Scenario fixtures
 
@@ -64,9 +65,22 @@ All three skill folders are also checked with the reference Skill validator, whi
 6. adds the cheapest useful architecture vaccine when justified;
 7. returns to `coding-max` for the original symptom check and final Review.
 
+### coding-tombstone retirement rubric
+
+A release-cleanup run should be scored on whether it:
+
+1. classifies candidates as safe-delete, deprecate, retain, or blocked;
+2. checks dynamic loading, configuration, packaging, public APIs, and persisted data instead of trusting zero static references;
+3. protects the replacement before deletion and retires one rollback-safe set at a time;
+4. removes obsolete callers, tests, docs, configs, and compatibility paths without moving code into an archive folder;
+5. verifies tests, build/package/install surfaces, and residue searches without inventing remote results;
+6. records a searchable Tombstone with a replacement, evidence, rollback, anti-resurrection gate, and target release;
+7. routes discovered defects, structural work, and verification gaps to the owning companion Skills.
+
 ## Current limitations
 
 - No cross-model success rate has been published yet.
+- No dedicated `coding-tombstone` fixture has been published yet; its rubric is contract-tested but still needs retained model-run artifacts.
 - Fixture outcomes are not counted as wins unless the full run artifacts are retained and independently reviewable.
 - Contract tests prove package integrity, not that every model will follow every instruction.
 - GitHub stars and install counts measure distribution, not debugging quality.

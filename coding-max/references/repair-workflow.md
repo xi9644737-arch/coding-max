@@ -16,7 +16,7 @@
 
 ## 3. TDD
 
-先写旧实现会失败的回归测试（RED），再最小修复（GREEN），最后清理（REFACTOR）。不能自动化时记录可重复命令、输入、预期和实际，不冒充自动测试。架构根因只做安全止血并标 `arch-*`，除非授权重构。
+先写旧实现会在目标产品断言失败的回归测试（RED），再最小修复（GREEN），最后清理（REFACTOR）。barrier、timeout、fixture、清理或测试钩子自身失败不是有效 RED；修正 harness 后重跑。仅把改变诊断方向的被拒证据简记在胶囊“弯路”，不记录普通命令错误。不能自动化时记录可重复命令、输入、预期和实际，不冒充自动测试。架构根因只做安全止血并标 `arch-*`，除非授权重构。
 
 ## 4. 自审与验证
 
@@ -26,4 +26,4 @@
 
 ## 5. 关闭
 
-按 `bug-memory-format.md` 补全症状、复现、根因、修复、影响、验证、回滚和胶囊；写 `resolved|blocked`，不得遗留虚假 `investigating`；更新或合并 `BUG_PATTERNS.md`。删除 trace、临时物和已完成恢复点。
+按 `bug-memory-format.md` 补全症状、复现、根因、修复、影响、验证、回滚、闭环和胶囊；写 `resolved|blocked`，不得遗留虚假 `investigating`；更新或合并 `BUG_PATTERNS.md`。删除 trace、临时物和已完成恢复点。

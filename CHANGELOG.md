@@ -1,6 +1,28 @@
 # Changelog
 
-> The focused maintenance-suite line continues at `v0.0.3beta`. Existing historical tags remain immutable snapshots.
+> The focused maintenance-suite line continues at `v0.0.4beta`. Existing historical tags remain immutable snapshots.
+
+## [0.0.4beta] - 2026-07-15
+
+### coding-tombstone
+
+- Added a fourth focused Skill for evidence-backed release cleanup, deprecation, safe retirement, and anti-resurrection Tombstone records.
+- Required static, dynamic, configuration, build, public API, and persisted-data consumer checks before deletion.
+- Prohibited archive-folder deletion theater, automatic publishing, subjective whole-repository rewrites, and vendor/Agent binding.
+- Kept the package under 8 KiB with a 2.5 KiB entrypoint ceiling and conditional retirement/record references.
+
+### coding-max
+
+- Rejected harness, fixture, cleanup, barrier, and timeout failures as product RED evidence.
+- Added compact closure fields for regression vaccines, observed change references, automatic execution, and conditional production monitoring.
+- Required code-change closeout to reconcile verified changes into the project profile without routine document churn.
+- Kept detailed evidence rules in conditional references instead of expanding the always-loaded router.
+
+### Maintenance-suite integration
+
+- Added four-skill discovery and installer coverage while preserving independent installation.
+- Kept Bug, Review, Pipeline, Tombstone, and project-profile records local by default.
+- Enforced per-skill entrypoint budgets and a 50 KiB runtime-suite ceiling.
 
 ## [0.0.3beta] - 2026-07-15
 

@@ -18,7 +18,7 @@ version="$(tr -d '\r\n' < "$TMP/VERSION")"
 mkdir -p "$SKILLS_DIR"
 backup_root="$(dirname "$SKILLS_DIR")/.skill-backups/$(date +%Y%m%d-%H%M%S)"
 
-for name in coding-max coding-untangle coding-pipeline; do
+for name in coding-max coding-untangle coding-pipeline coding-tombstone; do
   target="$SKILLS_DIR/$name"
   if [[ -d "$target" ]]; then
     mkdir -p "$backup_root"

@@ -12,18 +12,7 @@
 
 ## 1. 初始化规则
 
-统一写入项目根目录的 `.project-memory/`。创建缺失目录和文件，不覆盖已有内容：
-
-```text
-.project-memory/
-├── BUG_PATTERNS.md
-├── REVIEWS.md
-├── PROJECT_PROFILE.md
-├── PHASE.json
-├── bugs/
-├── reviews/
-└── pipelines/
-```
+统一写入项目根 `.project-memory/`；按需创建 `bugs/`、`reviews/`、`pipelines/`、`BUG_PATTERNS.md`、`REVIEWS.md`、`PROJECT_PROFILE.md` 和 `PHASE.json`，不覆盖已有内容。
 
 优先复制 `memory-template/`。仅在阻塞时把 `RESUME.md` 复制为 `.project-memory/.resume.md`；`PHASE.json` 仅在联动 pipeline 时创建。若仓库已有等价项目记忆，沿用其路径并注明，不并行创建第二套。
 
@@ -31,14 +20,12 @@
 
 路径：`.project-memory/bugs/BUG-YYYY-MM-DD-<slug>.md`。
 
-状态只使用：
+状态：
 
 ```text
 investigating -> fixing -> verifying -> resolved
                                   \-> blocked
 ```
-
-报告模板：
 
 ```markdown
 ---
@@ -79,6 +66,12 @@ tags: []
 | 命令 | 结果 | 证据摘要 |
 |---|---|---|
 
+## 闭环
+- 关联变更：未提交 | <commit / PR / release>
+- 回归疫苗：<测试、lint、类型检查或 CI gate>
+- 自动执行：本地默认测试 | <CI job> | 尚未接入
+- 上线观察：不适用 | <指标、窗口、阈值>
+
 ## 胶囊
 - 弯路：
 - 突破：
@@ -90,11 +83,15 @@ tags: []
 - 修改前写 `investigating`，开始修改写 `fixing`，运行最终验证写 `verifying`。
 - 验证通过写 `resolved` 和真实日期；不能解决写 `blocked`、阻塞证据和下一步。
 - 不得以摘要替代实际命令，不得把未运行的检查标为通过。
+- RED 须落在产品断言；barrier、timeout、fixture、清理或钩子失败先修 harness。只把改变方向的被拒证据写入“弯路”，不记操作错误。
+- 修复须写回归疫苗及是否进入默认测试/CI；测试存在不等于 CI 已执行。
+- 关联变更只填已观察到的 commit、PR 或 release；未提交照实写，不得为填字段擅自提交或伪造引用。
+- 上线观察仅在生产问题、Hotfix 或用户要求时填写指标、窗口和阈值；其他任务写“不适用”，不得虚构生产环境。
 - Hotfix 可以事后创建，但必须写 `[HOTFIX]` 标签和止血/永久修复差异。
 
 ## 3. Bug 索引与模式合并
 
-`BUG_PATTERNS.md` 顶部索引：
+`BUG_PATTERNS.md` 索引：
 
 ```markdown
 | 日期 | 状态 | 类型 | 标签 | 症状摘要 | 报告 |
@@ -102,18 +99,9 @@ tags: []
 | 2026-07-14 | resolved | quick | null-check | 缺失字段导致崩溃 | [BUG-...](bugs/BUG-....md) |
 ```
 
-索引下面记录可复用模式。根因标签和关键症状至少两项匹配时合并，不重复创建同一模式；在原模式追加本次报告链接和差异。只相似但根因未证实时新建条目。
+索引下记录可复用模式。根因标签和关键症状至少两项匹配时合并，不重复创建同一模式；在原模式追加本次报告链接和差异。只相似但根因未证实时新建条目。
 
-常用同义扩展：
-
-| 症状 | 同义词 |
-|---|---|
-| 崩溃 | crash, panic, segfault, 闪退 |
-| 卡住 | hang, freeze, deadlock, timeout |
-| 偶发 | flaky, intermittent, race, heisenbug |
-| 数据错误 | corruption, stale, data loss, wrong result |
-| 不生效 | no-op, precedence, cache invalidation |
-| 回归 | regression, upgrade, downgrade, bisect |
+检索时同时扩展中英文症状同义词，例如 crash/崩溃、hang/卡住、flaky/偶发、stale/数据错误和 regression/回归。
 
 ## 4. Review 报告与索引
 
@@ -159,18 +147,7 @@ scope: working-tree | commit | branch | files
 
 路径：`.project-memory/PHASE.json`。
 
-```json
-{
-  "state": "idle",
-  "target": "",
-  "skill": "coding-max",
-  "started_at": null,
-  "updated_at": null,
-  "retry": 0,
-  "verification_level": "none",
-  "report": null
-}
-```
+从 `memory-template/PHASE.json` 初始化；保留 `state`、`target`、`skill`、时间、`retry`、`verification_level` 和 `report` 字段。
 
 合法流转：
 
@@ -189,26 +166,7 @@ idle -> bootstrapping -> testing -> done
 
 ## 6. 恢复点
 
-路径：`.project-memory/.resume.md`。三次失败或外部阻塞时写：
-
-```yaml
----
-work_id: BUG-YYYY-MM-DD-<slug>
-mode: quick | standard | review | hotfix
-step: reproduce | diagnose | fix | verify | report
-strikes: 3
-perspective: data-flow | call-chain | config | timing
-blocked_at: <ISO-8601>
----
-
-## 已验证事实
-
-## 已排除假设
-
-## 待验证假设
-
-## 恢复命令
-```
+三次失败或外部阻塞时把 `memory-template/RESUME.md` 复制为 `.project-memory/.resume.md`，填写工作、模式、步骤、次数、视角、时间，以及已证实/排除/待验证事实和恢复命令。
 
 恢复时先验证工作树和报告仍对应当前代码，再继续；解决后删除恢复点。
 

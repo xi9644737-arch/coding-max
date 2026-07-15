@@ -1,34 +1,35 @@
 # coding-max maintenance suite
 
-> Vendor-neutral Agent Skills for root-cause repair, safe untangling, and trustworthy verification in long-lived codebases.
+> Vendor-neutral Skills for root-cause repair, safe untangling, trustworthy verification, and evidence-backed retirement.
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.3beta-orange">
+  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.4beta-orange">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
-  <img alt="Skills" src="https://img.shields.io/badge/skills-3-brightgreen">
+  <img alt="Skills" src="https://img.shields.io/badge/skills-4-brightgreen">
   <a href="https://skills.sh/xi9644737-arch/coding-max"><img alt="skills.sh installs" src="https://skills.sh/b/xi9644737-arch/coding-max"></a>
 </p>
 
 Most debugging prompts stop at “the tests pass.” This package goes further: it finds the first broken contract, proves the fix with a regression, reviews the resulting diff, cleans temporary diagnostics, and records the result so the same failure is easier to solve next time.
 
-`coding-max` remains the primary product and final maintenance authority. `coding-untangle` is loaded only for proven structural coupling, while `coding-pipeline` restores missing verification infrastructure or enforces an already-defined boundary.
+`coding-max` remains the primary repair and Review authority. `coding-untangle` handles proven structural coupling, `coding-pipeline` restores verification, and `coding-tombstone` proves obsolete paths can be retired before release.
 
-## Focused maintenance triad
+## Focused maintenance suite
 
 | Role | Skill | Job |
 |---|---|---|
 | Core maintenance skill | `coding-max` | Diagnose, repair, verify, review, and retain defect knowledge in high-value codebases |
 | Structural surgery | `coding-untangle` | Prove and safely reduce coupling in existing code without redesigning the whole system |
 | Conditional safety net | `coding-pipeline` | Restore tests, CI, coverage, and pre-commit only when reliable verification is missing |
+| Release graveyard | `coding-tombstone` | Prove, retire, and tombstone obsolete paths without hiding them in archive directories |
 
-`coding-max` and `coding-untangle` reuse the same Bug and Review records. `coding-max` owns final closure; `coding-untangle` cannot close the originating bug. `coding-pipeline` uses its Pipeline report and `.project-memory/PHASE.json`, and cannot decide architecture. The suite deliberately stops at brownfield maintenance instead of expanding into a general SDLC or Agent Harness.
+`coding-max` and `coding-untangle` reuse Bug and Review records. `coding-pipeline` owns Pipeline reports and `.project-memory/PHASE.json`. `coding-tombstone` owns `TOMBSTONES.md` and retirement records, then returns final code-quality Review to `coding-max`. The suite stops at brownfield maintenance instead of expanding into a general SDLC or Agent Harness.
 
 ## Quick install
 
-Install all three skills with the universal Skills CLI:
+Install all four skills with the universal Skills CLI:
 
 ```bash
-npx skills add xi9644737-arch/coding-max -g --skill coding-max coding-untangle coding-pipeline
+npx skills add xi9644737-arch/coding-max -g --skill coding-max coding-untangle coding-pipeline coding-tombstone
 ```
 
 Or install to an explicit Agent Skills directory without guessing the host:
@@ -41,7 +42,7 @@ git clone https://github.com/xi9644737-arch/coding-max.git
 # .\coding-max\install.ps1 -Destination C:\absolute\path\to\skills
 ```
 
-The repository is discoverable as three independent `SKILL.md` packages. Each can be installed alone; the custom installers back up existing copies before replacement.
+The repository is discoverable as four independent `SKILL.md` packages. Each can be installed alone; the custom installers back up existing copies before replacement.
 
 ## Where coding-max fits
 
@@ -54,6 +55,8 @@ The repository is discoverable as three independent `SKILL.md` packages. Each ca
 - completed implementations that need a behavior-focused final review.
 
 Modes stay proportional to risk: Explore, Review, Quick, Standard, and Hotfix.
+
+Every code-change closeout also reconciles `.project-memory/PROJECT_PROFILE.md`. Only source-verified facts that actually changed are written, so the profile stays useful without generating routine churn.
 
 ```text
 Reproduce / RED evidence
@@ -102,6 +105,22 @@ Audit project and subprojects
 
 It supports Python, Node.js, Go, Rust, Java, generic commands, Monorepos, GitHub Actions, GitLab CI, and provider-neutral CI templates. Coverage is measured or reported as `unknown`; it is never estimated.
 
+## Where coding-tombstone fits
+
+`coding-tombstone` handles release cleanup only after an obsolete path can be proved dead or given an explicit deprecation window:
+
+```text
+Inventory candidates and replacements
+  -> check static, dynamic, config, build, public, and persisted consumers
+  -> protect replacement behavior
+  -> retire one rollback-safe set
+  -> verify tests, build, package, and residue search
+  -> record a tombstone that prevents accidental resurrection
+  -> return to coding-max for final Review
+```
+
+It does not treat zero search hits, age, coverage, or complexity as proof. It never moves dead code into `.attic`, a graveyard folder, or a backup copy; Git history and tombstone evidence provide recovery.
+
 ## Progressive disclosure
 
 ```text
@@ -110,7 +129,7 @@ metadata                 always visible: discovery only
     └── references/      loaded conditionally: workflows, diagnostics, formats
 ```
 
-Contract tests cap `coding-max/SKILL.md` at 4 KiB and `coding-untangle/SKILL.md` at 3 KiB, with per-package budgets. New capabilities belong in conditional references instead of inflating the always-loaded prompt.
+Contract tests cap `coding-max/SKILL.md` at 4 KiB, `coding-untangle/SKILL.md` at 3 KiB, and `coding-tombstone/SKILL.md` at 2.5 KiB, with per-package budgets and a 50 KiB suite ceiling. New capabilities belong in conditional references instead of inflating the always-loaded prompt.
 
 ## Evidence, not marketing claims
 
@@ -141,6 +160,9 @@ See [`EVALUATION.md`](EVALUATION.md) for what is currently proven, what remains 
 ├── coding-pipeline/
 │   ├── SKILL.md
 │   └── references/
+├── coding-tombstone/
+│   ├── SKILL.md
+│   └── references/
 ├── examples/
 ├── test-fixtures/
 ├── tests/test_skill_contracts.py
@@ -154,7 +176,7 @@ See [`EVALUATION.md`](EVALUATION.md) for what is currently proven, what remains 
 - Host-neutral source: no model, vendor, IDE, MCP server, or plugin is required.
 - No fabricated evidence: commands, test results, coverage, and CI status must be observed.
 - No debug residue: temporary traces, dumps, logs, and recovery files are removed at closeout.
-- No repository pollution: local project memory is ignored by this source repository.
+- No repository pollution: local Bug, Review, Pipeline, and Tombstone memory is ignored by this source repository.
 
 See [`examples/`](examples/) for usage and [`CHANGELOG.md`](CHANGELOG.md) for release history.
 

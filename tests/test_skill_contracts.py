@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ("coding-max", "coding-untangle", "coding-pipeline")
+SKILLS = ("coding-max", "coding-untangle", "coding-pipeline", "coding-tombstone")
 
 
 def read(relative: str) -> str:
@@ -56,7 +56,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_public_version_is_consistent(self) -> None:
         version = read("VERSION").strip()
-        self.assertEqual(version, "0.0.3beta")
+        self.assertEqual(version, "0.0.4beta")
         self.assertIn(f"v{version}", read("README.md"))
         self.assertIn(f"[{version}]", read("CHANGELOG.md"))
         self.assertIn("npx skills add xi9644737-arch/coding-max", read("README.md"))
@@ -110,12 +110,46 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("characterization", read("coding-untangle/references/safe-untangling.md"))
         self.assertIn("最小可执行疫苗", read("coding-untangle/references/fitness-rules.md"))
 
+    def test_tombstone_owns_evidence_backed_retirement_only(self) -> None:
+        skill = read("coding-tombstone/SKILL.md")
+        workflow = read("coding-tombstone/references/retirement-workflow.md")
+        memory_format = read("coding-tombstone/references/tombstone-format.md")
+        for handoff in ("../coding-max/SKILL.md", "../coding-untangle/SKILL.md", "../coding-pipeline/SKILL.md"):
+            self.assertIn(handoff, skill)
+        for boundary in ("动态加载", "公开 API", "持久化", "不得移入"):
+            self.assertIn(boundary, workflow)
+        for artifact in ("TOMBSTONES.md", "candidate", "deprecated", "removed", "verified", "blocked"):
+            self.assertIn(artifact, memory_format)
+        self.assertIn("任一活动状态", memory_format)
+        self.assertIn("显式只读", skill)
+        self.assertIn("不得污染父仓库", skill)
+
     def test_bug_report_and_review_closeout_are_mandatory(self) -> None:
         skill = read("coding-max/SKILL.md")
         self.assertIn("所有实际代码改动必须", skill)
         self.assertIn("通过写 `resolved`", skill)
         self.assertIn("REVIEWS.md", skill)
         self.assertIn("Bug 报告", skill)
+
+    def test_repair_evidence_and_closure_are_honest(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        workflow = read("coding-max/references/repair-workflow.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        self.assertIn("回归疫苗", skill)
+        self.assertIn("目标产品断言", workflow)
+        self.assertIn("被拒证据", workflow)
+        for field in ("关联变更", "回归疫苗", "自动执行", "上线观察"):
+            self.assertIn(field, memory_format)
+        self.assertIn("不得为填字段擅自提交", memory_format)
+        self.assertIn("Hotfix", memory_format)
+
+    def test_project_profile_is_reconciled_without_churn(self) -> None:
+        max_skill = read("coding-max/SKILL.md")
+        retirement = read("coding-tombstone/references/retirement-workflow.md")
+        self.assertIn("PROJECT_PROFILE.md", max_skill)
+        self.assertIn("事实变化才更新", max_skill)
+        self.assertIn("PROJECT_PROFILE.md", retirement)
+        self.assertIn("入口、命令、结构或关键路径", retirement)
 
     def test_advanced_debugging_is_progressive_and_complete(self) -> None:
         skill = read("coding-max/SKILL.md")
@@ -153,22 +187,36 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("SKILLS_DIR=\"$1\"", read("install.sh"))
 
     def test_package_size_budgets(self) -> None:
-        budgets = {"coding-max": 18_000, "coding-untangle": 15_000, "coding-pipeline": 22_000}
+        budgets = {
+            "coding-max": 18_000,
+            "coding-untangle": 15_000,
+            "coding-pipeline": 22_000,
+            "coding-tombstone": 8_000,
+        }
         suite_total = 0
         for name, budget in budgets.items():
-            total = sum(path.stat().st_size for path in (ROOT / name).rglob("*") if path.is_file())
+            total = sum(
+                len(path.read_bytes().replace(b"\r\n", b"\n"))
+                for path in (ROOT / name).rglob("*")
+                if path.is_file()
+            )
             suite_total += total
             self.assertLessEqual(total, budget, f"{name} size {total} exceeds {budget}")
         self.assertLessEqual(suite_total, 50_000, f"runtime suite size {suite_total} exceeds 50 KiB budget")
         self.assertLessEqual(
-            (ROOT / "coding-max" / "SKILL.md").stat().st_size,
+            len((ROOT / "coding-max" / "SKILL.md").read_bytes().replace(b"\r\n", b"\n")),
             4_096,
             "coding-max/SKILL.md exceeds 4 KiB; move details into conditional resources",
         )
         self.assertLessEqual(
-            (ROOT / "coding-untangle" / "SKILL.md").stat().st_size,
+            len((ROOT / "coding-untangle" / "SKILL.md").read_bytes().replace(b"\r\n", b"\n")),
             3_072,
             "coding-untangle/SKILL.md exceeds 3 KiB; move details into conditional resources",
+        )
+        self.assertLessEqual(
+            len((ROOT / "coding-tombstone" / "SKILL.md").read_bytes().replace(b"\r\n", b"\n")),
+            2_560,
+            "coding-tombstone/SKILL.md exceeds 2.5 KiB; move details into conditional resources",
         )
 
     def test_installer_requires_explicit_destination(self) -> None:
@@ -182,6 +230,8 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("mkdir -p", shell)
         self.assertIn('"coding-untangle"', powershell)
         self.assertIn("coding-untangle", shell)
+        self.assertIn('"coding-tombstone"', powershell)
+        self.assertIn("coding-tombstone", shell)
 
 
 if __name__ == "__main__":
