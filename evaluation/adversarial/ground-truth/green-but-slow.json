@@ -1,0 +1,25 @@
+{
+  "id": "green-but-slow",
+  "evaluator_only": true,
+  "actual_root_cause": "deduplicate performs linear membership checks for every item and therefore grows quadratically",
+  "performance_budget": "2000 unique values require fewer than 10000 equality comparisons",
+  "evaluator_commands": [
+    {
+      "id": "functional-regression",
+      "argv": ["{python}", "-m", "unittest", "tests.test_functional", "-v"],
+      "cwd": ".",
+      "env": {},
+      "expected_exit": 0,
+      "expected_tests": [{"contains": "test_preserves_first_seen_order", "outcome": "ok"}]
+    },
+    {
+      "id": "comparison-budget",
+      "argv": ["{python}", "{benchmark_root}/ground-truth/checks/green-but-slow/test_performance.py", "-v"],
+      "cwd": ".",
+      "env": {"PYTHONPATH": "{workspace}"},
+      "expected_exit": 0,
+      "expected_tests": [{"contains": "test_unique_batch_comparison_budget", "outcome": "ok"}]
+    }
+  ],
+  "required_evidence": ["repeatable workload", "before/after metric", "functional equivalence", "complexity origin"]
+}

@@ -1,37 +1,41 @@
 # 项目病历与状态格式
 
-## 目录
+统一写任务根 `.project-memory/`，从 `memory-template/` 按需补缺；不覆盖旧内容或并建等价记忆。`PHASE.json` 仅用于 pipeline，`.resume.md` 仅用于阻塞。
 
-1. 初始化规则
-2. Bug 报告生命周期
-3. Bug 索引与模式合并
-4. Review 报告与索引
-5. PHASE 状态协议
-6. 恢复点
-7. 标签与疫苗
-
-## 1. 初始化规则
-
-统一写入项目根 `.project-memory/`；按需创建 `bugs/`、`reviews/`、`pipelines/`、`BUG_PATTERNS.md`、`REVIEWS.md`、`PROJECT_PROFILE.md` 和 `PHASE.json`，不覆盖已有内容。
-
-优先复制 `memory-template/`。仅在阻塞时把 `RESUME.md` 复制为 `.project-memory/.resume.md`；`PHASE.json` 仅在联动 pipeline 时创建。若仓库已有等价项目记忆，沿用其路径并注明，不并行创建第二套。
-
-## 2. Bug 报告生命周期
+## Bug 病历
 
 路径：`.project-memory/bugs/BUG-YYYY-MM-DD-<slug>.md`。
-
-状态：
-
-```text
-investigating -> fixing -> verifying -> resolved
-                                  \-> blocked
-```
 
 ```markdown
 ---
 id: BUG-YYYY-MM-DD-<slug>
 status: investigating
-severity: trivial | quick | standard | hotfix
+diagnosis_stage: unknown
+mode: quick | standard
+urgency: routine | hotfix
+risk:
+  blast_radius: low | medium | high
+  uncertainty: low | medium | high
+  irreversibility: low | medium | high
+  migration: none | present
+  security: none | present
+  data: none | present
+  public_contract: none | present
+human_gate:
+  required: false
+  reason: null
+  decision_needed: null
+actionability:
+  decision: pending | passed
+  evidence: []
+  blockers: []
+signature:
+  component: null
+  failure_mode: null
+  origin_contract: null
+  symptom_fingerprint: null
+  environment: null
+stage_evidence: []
 reported: YYYY-MM-DD
 resolved: null
 tags: []
@@ -79,32 +83,19 @@ tags: []
 - 下次优先检查：
 ```
 
-规则：
+`stage_evidence` 每项写 `{stage, evidence}`；证据必须是可复核的命令、断言、路径或观测结果。未知字段保留 `null`，随当前事件证据补齐，不得从历史病例复制为事实。
 
-- 修改前写 `investigating`，开始修改写 `fixing`，运行最终验证写 `verifying`。
-- 验证通过写 `resolved` 和真实日期；不能解决写 `blocked`、阻塞证据和下一步。
-- 不得以摘要替代实际命令，不得把未运行的检查标为通过。
-- RED 须落在产品断言；barrier、timeout、fixture、清理或钩子失败先修 harness。只把改变方向的被拒证据写入“弯路”，不记操作错误。
-- 多病历链中，现象病历持有用户影响与产品 RED，根因病历持有上游合同/结构证据；互链但不得重复认领同一 RED、修复或验证，独立根因独立关闭。
-- 修复须写回归疫苗及是否进入默认测试/CI；测试存在不等于 CI 已执行。
-- 回滚不得删除或弱化回归疫苗；新 API 被回退时把疫苗改写为旧合同防复活门，无法保留须说明。
-- 关联变更只填已观察到的 commit、PR 或 release；未提交照实写，不得为填字段擅自提交或伪造引用。
-- 上线观察仅在生产问题、Hotfix 或用户要求时填写指标、窗口和阈值；其他任务写“不适用”，不得虚构生产环境。
-- Hotfix 可以事后创建，但必须写 `[HOTFIX]` 标签和止血/永久修复差异。
+## 交叉不变量
 
-## 3. Bug 索引与模式合并
+- 生命周期为 `investigating -> fixing -> verifying -> resolved`；任一活动状态可进入 `blocked`，恢复时回到记录的活动状态。
+- `diagnosis_stage` 只按 incident protocol 推进或回退，与生命周期正交。永久修复进入 `fixing` 前，`actionability.decision` 必须为 `passed`、证据非空且无待决 Human Gate；预授权可逆止血须标为止血，不冒充永久修复。
+- `resolved` 仅允许同时满足：`diagnosis_stage: regression-proven`、验证表含实际执行结果、`resolved` 为真实日期。`blocked` 必须记录阻塞证据、下一步和 `.resume.md`；不得写关闭日期。
+- 不得以摘要替代命令或把未运行检查标为通过。RED 须落在产品断言；harness 问题先修设施，只记录改变调查方向的被拒证据。
+- 现象病历持有影响与产品 RED，根因病历持有上游证据；互链但不得重复认领 RED、修复或验证。
+- 回滚不得删除或弱化回归疫苗；API 回退时改为旧合同防复活门。引用只填已观察到的 commit/PR/release，不得为填字段擅自提交；测试存在不等于 CI 已执行。
+- 仅生产问题或 Hotfix 写真实观察指标。Hotfix 可事后建档，但须区分可逆止血与 Standard 永久修复。
 
-`BUG_PATTERNS.md` 索引：
-
-```markdown
-| 日期 | 状态 | 类型 | 标签 | 症状摘要 | 报告 |
-|---|---|---|---|---|---|
-| 2026-07-14 | resolved | quick | null-check | 缺失字段导致崩溃 | [BUG-...](bugs/BUG-....md) |
-```
-
-索引下记录可复用模式。根因标签和关键症状至少两项匹配时合并，不重复创建同一模式；在原模式追加本次报告链接和差异。只相似但根因未证实时新建条目。
-
-## 4. Review 报告与索引
+## Review
 
 路径：`.project-memory/reviews/REVIEW-YYYY-MM-DD-<slug>.md`。
 
@@ -115,62 +106,25 @@ status: reviewing | completed | blocked
 reviewed: YYYY-MM-DD
 scope: working-tree | commit | branch | files
 ---
-
-# <审查标题>
-
+# <标题>
 ## 范围
 - 基线：
 - 文件：
 - 审查标准：
-
 ## 发现与处置
 | 严重度 | 发现 | 证据 | 处置 | Bug 报告 |
 |---|---|---|---|---|
-
 ## 验证
 | 命令 | 结果 |
 |---|---|
-
 ## 剩余风险
 - 无 | <说明>
 ```
 
-`REVIEWS.md` 使用：
+`REVIEWS.md` 索引列为日期、状态、范围、发现数、已修复、报告。零发现也关闭；每个实际修复问题链接独立 Bug 病历。
 
-```markdown
-| 日期 | 状态 | 范围 | 发现数 | 已修复 | 报告 |
-|---|---|---|---:|---:|---|
-```
+## PHASE、恢复与疫苗
 
-没有确认问题时也关闭 review 报告，发现数写 0。每个实际修复的问题必须链接独立 Bug 报告，避免把多个根因塞入一份审查记录。
+`PHASE.json` 保留 `state,target,skill,started_at,updated_at,retry,verification_level,report`，合法流转为 `idle -> bootstrapping -> testing -> done|failed`。本地成功写 `local`；仅观察到远程 CI 成功才写 `remote`。
 
-## 5. PHASE 状态协议
-
-路径：`.project-memory/PHASE.json`。
-
-从 `memory-template/PHASE.json` 初始化；保留 `state`、`target`、`skill`、时间、`retry`、`verification_level` 和 `report` 字段。
-
-合法流转：
-
-```text
-idle -> bootstrapping -> testing -> done
-                         \-> failed
-```
-
-- `coding-max` 发现测试荒漠时写 `bootstrapping` 并交给 `coding-pipeline`。
-- `coding-pipeline` 让本地测试可执行后写 `testing`。
-- 本地验证完成写 `done`、`verification_level: local`。
-- 只有实际看到远程 CI 成功才写 `verification_level: remote`。
-- 三次失败写 `failed`，`retry: 3`，并填写报告路径。
-
-## 6. 恢复点
-
-三次失败或外部阻塞时把 `memory-template/RESUME.md` 复制为 `.project-memory/.resume.md`，填写工作、模式、步骤、次数、视角、时间，以及已证实/排除/待验证事实和恢复命令。
-
-恢复前核对工作树；解决后删恢复点。
-
-## 7. 标签与疫苗
-
-标签用小写 kebab-case，如 `race-condition`、`memory-leak`、`boundary`、`wrong-layer`。
-
-同一架构标签累计三次时提示独立重构。疫苗优先选择能自动阻断同类问题的 lint、类型检查、测试或 CI 规则；新增工具前评估项目现有生态，不为一条病历强行引入重依赖。
+三次失败写 `failed`、`retry: 3` 和报告路径，再从 `RESUME.md` 创建 `.resume.md`，记录阻塞证据、事实、下一步、次数和恢复命令；解决后删除。标签用小写 kebab-case。疫苗优先复用现有 lint、类型、测试或 CI，不为单一病例引入重依赖。

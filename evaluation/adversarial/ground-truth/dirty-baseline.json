@@ -1,0 +1,28 @@
+{
+  "id": "dirty-baseline",
+  "evaluator_only": true,
+  "actual_root_cause": "normalize_name removes hyphens even though punctuation is part of the public name contract",
+  "preexisting_failure": "tests.test_unrelated.UnrelatedBaselineTests.test_legacy_report",
+  "evaluator_commands": [
+    {
+      "id": "target-regression",
+      "argv": ["{python}", "-m", "unittest", "tests.test_target", "-v"],
+      "cwd": ".",
+      "env": {},
+      "expected_exit": 0,
+      "expected_tests": [{"contains": "test_hyphen_is_preserved", "outcome": "ok"}]
+    },
+    {
+      "id": "classified-full-suite",
+      "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests", "-v"],
+      "cwd": ".",
+      "env": {},
+      "expected_exit": 1,
+      "expected_tests": [
+        {"contains": "test_hyphen_is_preserved", "outcome": "ok"},
+        {"contains": "test_legacy_report", "outcome": "FAIL"}
+      ]
+    }
+  ],
+  "required_evidence": ["pre-edit full-suite baseline", "target RED", "unrelated failure remains explicitly classified"]
+}

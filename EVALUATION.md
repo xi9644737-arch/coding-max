@@ -16,9 +16,10 @@ The suite verifies:
 |---|---|
 | Discovery | Valid `name` and `description` frontmatter |
 | Progressive disclosure | Every declared direct reference exists |
-| Package size | Per-skill budgets, 4/3/2.5 KiB ceilings for max/untangle/tombstone entrypoints, and a 50 KiB suite ceiling |
+| Context size | A 3.2 KiB `coding-max` kernel, bounded incident/repair/retrieval modules, per-skill package budgets, and a 53 KiB runtime-suite ceiling |
 | Repair closure | RED/GREEN, Bug report status, Review index, and report routing remain mandatory |
 | Advanced debugging | Backward tracing, flaky classification, untrusted evidence, and performance routing remain reachable on demand |
+| Incident runtime | Diagnostic stages, Actionability/Human Gates, context budgets, and lifecycle separation remain machine-checkable |
 | Structural handoff | `coding-max` owns Bug closure, `coding-untangle` owns safe structural migration, and `coding-pipeline` only enforces defined boundaries |
 | Retirement handoff | `coding-tombstone` owns evidence-backed retirement and Tombstone state, then returns final Review to `coding-max` |
 | Pipeline handoff | `coding-max` and `coding-pipeline` share the canonical `.project-memory/PHASE.json` protocol |
@@ -27,6 +28,23 @@ The suite verifies:
 | Release consistency | `VERSION`, README, and CHANGELOG agree |
 
 All four skill folders are also checked with the reference Skill validator, while install scripts receive PowerShell and Bash syntax validation before release.
+
+## External adversarial benchmark
+
+`evaluation/adversarial/` keeps public cases and workspaces separate from evaluator-only ground truth. The tested agent must never receive `ground-truth/` or `rubric.json`; this prevents prompt-visible answers from masquerading as diagnostic ability. Public bundles are built from an allowlist, reject symlink escapes, and contain only `case.json` plus the workspace.
+
+The first three cases test whether an agent resists a timeout-shaped but false diagnostic, attributes a dirty baseline correctly, and detects a severe performance regression despite green functional tests. Fatal integrity or authority violations score zero before weighted metrics are applied.
+
+Validate the benchmark structure with:
+
+```bash
+python evaluation/adversarial/validate.py
+python evaluation/adversarial/build_bundle.py misleading-timeout /tmp/coding-max-case
+# After the external model run:
+python evaluation/adversarial/run_evaluator.py misleading-timeout /tmp/coding-max-case/workspace /tmp/run-manifest.json
+```
+
+Validation checks source layout and schemas; the bundle builder enforces exposure boundaries. The evaluator records trusted command output, exit codes, digests, workspace snapshots, and structured expectations. Agent claims still require host-captured run artifacts from the external evaluation host; this package does not control or schedule the Agent.
 
 ## Scenario fixtures
 
@@ -80,6 +98,7 @@ A release-cleanup run should be scored on whether it:
 ## Current limitations
 
 - No cross-model success rate has been published yet.
+- No retained adversarial model-run artifact has been published yet; the benchmark contract and planted workspaces are deterministic, but behavior is still unmeasured.
 - No dedicated `coding-tombstone` fixture has been published yet; its rubric is contract-tested but still needs retained model-run artifacts.
 - Fixture outcomes are not counted as wins unless the full run artifacts are retained and independently reviewable.
 - Contract tests prove package integrity, not that every model will follow every instruction.

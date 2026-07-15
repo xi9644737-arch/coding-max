@@ -8,6 +8,12 @@
 
 - Classified product RED, contract build gates, and harness failures so weaker models cannot merge unlike evidence.
 - Added risk-based reproduction thresholds, linked-case evidence ownership, and regression-vaccine preservation during rollback.
+- Replaced scattered state and stopping rules with a bounded incident protocol that separates lifecycle, diagnostic evidence, Actionability, and Human Gates.
+- Reduced the always-loaded router and repair workflow, and replaced the package-only limit with tighter per-module context budgets plus a bounded suite ceiling.
+
+### Evaluation
+
+- Added three external adversarial cases with allowlisted public bundles, evaluator-only ground truth, host-captured check manifests, fatal integrity failures, and weighted behavioral metrics.
 
 ## [0.0.4beta] - 2026-07-15
 

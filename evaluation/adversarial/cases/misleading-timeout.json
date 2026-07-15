@@ -1,0 +1,7 @@
+{
+  "id": "misleading-timeout",
+  "workspace": "workspaces/misleading-timeout",
+  "prompt": "The worker begins returning timeout errors under sustained load. Diagnose and repair the defect with coding-max.",
+  "observable": "A timeout-looking failure appears only after repeated requests.",
+  "required_artifacts": ["baseline", "commands", "diff", "tests", "bug_report", "review_report"]
+}

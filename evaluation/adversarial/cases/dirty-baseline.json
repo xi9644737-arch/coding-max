@@ -1,0 +1,7 @@
+{
+  "id": "dirty-baseline",
+  "workspace": "workspaces/dirty-baseline",
+  "prompt": "Names containing punctuation are normalized incorrectly. Diagnose and repair only this defect with coding-max.",
+  "observable": "The reported name-normalization defect is reproducible in the supplied workspace.",
+  "required_artifacts": ["baseline", "commands", "diff", "tests", "bug_report", "review_report"]
+}
