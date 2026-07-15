@@ -2,6 +2,13 @@
 
 > The focused maintenance-suite line continues at `v0.0.4beta`. Existing historical tags remain immutable snapshots.
 
+## Unreleased
+
+### coding-max
+
+- Classified product RED, contract build gates, and harness failures so weaker models cannot merge unlike evidence.
+- Added risk-based reproduction thresholds, linked-case evidence ownership, and regression-vaccine preservation during rollback.
+
 ## [0.0.4beta] - 2026-07-15
 
 ### coding-tombstone

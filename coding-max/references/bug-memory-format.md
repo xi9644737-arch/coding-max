@@ -55,6 +55,7 @@ tags: []
 - Why 1：
 - Why 2：
 - 同模式扫描：
+- 关联病历：无 | 现象: BUG-... | 根因: BUG-...
 
 ## 修复
 - 方案：
@@ -84,7 +85,9 @@ tags: []
 - 验证通过写 `resolved` 和真实日期；不能解决写 `blocked`、阻塞证据和下一步。
 - 不得以摘要替代实际命令，不得把未运行的检查标为通过。
 - RED 须落在产品断言；barrier、timeout、fixture、清理或钩子失败先修 harness。只把改变方向的被拒证据写入“弯路”，不记操作错误。
+- 多病历链中，现象病历持有用户影响与产品 RED，根因病历持有上游合同/结构证据；互链但不得重复认领同一 RED、修复或验证，独立根因独立关闭。
 - 修复须写回归疫苗及是否进入默认测试/CI；测试存在不等于 CI 已执行。
+- 回滚不得删除或弱化回归疫苗；新 API 被回退时把疫苗改写为旧合同防复活门，无法保留须说明。
 - 关联变更只填已观察到的 commit、PR 或 release；未提交照实写，不得为填字段擅自提交或伪造引用。
 - 上线观察仅在生产问题、Hotfix 或用户要求时填写指标、窗口和阈值；其他任务写“不适用”，不得虚构生产环境。
 - Hotfix 可以事后创建，但必须写 `[HOTFIX]` 标签和止血/永久修复差异。
@@ -100,8 +103,6 @@ tags: []
 ```
 
 索引下记录可复用模式。根因标签和关键症状至少两项匹配时合并，不重复创建同一模式；在原模式追加本次报告链接和差异。只相似但根因未证实时新建条目。
-
-检索时同时扩展中英文症状同义词，例如 crash/崩溃、hang/卡住、flaky/偶发、stale/数据错误和 regression/回归。
 
 ## 4. Review 报告与索引
 
@@ -162,23 +163,14 @@ idle -> bootstrapping -> testing -> done
 - 只有实际看到远程 CI 成功才写 `verification_level: remote`。
 - 三次失败写 `failed`，`retry: 3`，并填写报告路径。
 
-旧 `.pipeline-done` 只用于一次性迁移读取；读取后转换为 `PHASE.json`，不再继续生成。
-
 ## 6. 恢复点
 
 三次失败或外部阻塞时把 `memory-template/RESUME.md` 复制为 `.project-memory/.resume.md`，填写工作、模式、步骤、次数、视角、时间，以及已证实/排除/待验证事实和恢复命令。
 
-恢复时先验证工作树和报告仍对应当前代码，再继续；解决后删除恢复点。
+恢复前核对工作树；解决后删恢复点。
 
 ## 7. 标签与疫苗
 
-标签保持小写 kebab-case：
-
-- 异常：`swallowed-exception`, `type-error`, `null-check`
-- 并发：`race-condition`, `deadlock`, `thread-safety`
-- 资源：`memory-leak`, `connection-leak`, `file-not-closed`
-- 输入：`sql-injection`, `xss`, `path-traversal`, `no-validation`
-- 逻辑：`off-by-one`, `boundary`, `infinite-loop`
-- 架构：`arch-coupling`, `circular-import`, `wrong-layer`, `god-module`
+标签用小写 kebab-case，如 `race-condition`、`memory-leak`、`boundary`、`wrong-layer`。
 
 同一架构标签累计三次时提示独立重构。疫苗优先选择能自动阻断同类问题的 lint、类型检查、测试或 CI 规则；新增工具前评估项目现有生态，不为一条病历强行引入重依赖。

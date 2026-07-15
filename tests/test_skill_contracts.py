@@ -143,6 +143,18 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("不得为填字段擅自提交", memory_format)
         self.assertIn("Hotfix", memory_format)
 
+    def test_evidence_ownership_is_explicit_for_weaker_models(self) -> None:
+        workflow = read("coding-max/references/repair-workflow.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        for evidence_class in ("产品 RED", "合同构建门", "harness failure"):
+            self.assertIn(evidence_class, workflow)
+        self.assertIn("连续三次同型", workflow)
+        self.assertIn("普通确定性缺陷不机械三跑", workflow)
+        for ownership_rule in ("现象病历", "根因病历", "不得重复认领"):
+            self.assertIn(ownership_rule, memory_format)
+        self.assertIn("关联病历", memory_format)
+        self.assertIn("回滚不得删除或弱化回归疫苗", memory_format)
+
     def test_project_profile_is_reconciled_without_churn(self) -> None:
         max_skill = read("coding-max/SKILL.md")
         retirement = read("coding-tombstone/references/retirement-workflow.md")
