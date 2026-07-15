@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SKILLS = ("coding-max", "coding-untangle", "coding-pipeline")
 
 
 def read(relative: str) -> str:
@@ -55,7 +56,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_public_version_is_consistent(self) -> None:
         version = read("VERSION").strip()
-        self.assertEqual(version, "0.1.3beta")
+        self.assertEqual(version, "0.0.3beta")
         self.assertIn(f"v{version}", read("README.md"))
         self.assertIn(f"[{version}]", read("CHANGELOG.md"))
         self.assertIn("npx skills add xi9644737-arch/coding-max", read("README.md"))
@@ -67,14 +68,14 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("--verify-tag", release_workflow)
 
     def test_required_frontmatter_and_names(self) -> None:
-        for name in ("coding-max", "coding-pipeline"):
+        for name in SKILLS:
             metadata = frontmatter(read(f"{name}/SKILL.md"))
             self.assertEqual(metadata.get("name"), name)
             self.assertTrue(metadata.get("description"))
             self.assertEqual(set(metadata), {"name", "description"})
 
     def test_all_direct_references_exist(self) -> None:
-        for name in ("coding-max", "coding-pipeline"):
+        for name in SKILLS:
             body = read(f"{name}/SKILL.md")
             references = re.findall(r"`((?:references|memory-template)/[^`]+)`", body)
             self.assertTrue(references, f"{name} declares no conditional resources")
@@ -91,6 +92,23 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn(".project-memory/PHASE.json", pipeline_skill)
         self.assertNotIn(".pipeline-done", max_skill)
         self.assertNotIn(".pipeline-done", pipeline_skill)
+
+    def test_untangle_handoff_preserves_responsibility_boundaries(self) -> None:
+        max_skill = read("coding-max/SKILL.md")
+        untangle_skill = read("coding-untangle/SKILL.md")
+        pipeline_skill = read("coding-pipeline/SKILL.md")
+        self.assertIn("../coding-untangle/SKILL.md", max_skill)
+        self.assertIn("../coding-max/SKILL.md", untangle_skill)
+        self.assertIn("../coding-pipeline/SKILL.md", untangle_skill)
+        self.assertIn("../coding-untangle/SKILL.md", pipeline_skill)
+        self.assertIn("不得关闭原 Bug", untangle_skill)
+        self.assertIn("显式只读仅在回复中交付", untangle_skill)
+        self.assertIn("不得污染父仓库", untangle_skill)
+        self.assertIn("不得自行决定架构", pipeline_skill)
+        for capability in ("结构依赖", "共享状态", "时序耦合", "变更耦合"):
+            self.assertIn(capability, read("coding-untangle/references/coupling-audit.md"))
+        self.assertIn("characterization", read("coding-untangle/references/safe-untangling.md"))
+        self.assertIn("最小可执行疫苗", read("coding-untangle/references/fitness-rules.md"))
 
     def test_bug_report_and_review_closeout_are_mandatory(self) -> None:
         skill = read("coding-max/SKILL.md")
@@ -129,20 +147,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertNotIn("image: python:3.12", template)
 
     def test_skills_are_vendor_neutral(self) -> None:
-        for name in ("coding-max", "coding-pipeline"):
+        for name in SKILLS:
             self.assertFalse((ROOT / name / "agents").exists())
         self.assertIn("[string]$Destination", read("install.ps1"))
         self.assertIn("SKILLS_DIR=\"$1\"", read("install.sh"))
 
     def test_package_size_budgets(self) -> None:
-        budgets = {"coding-max": 18_000, "coding-pipeline": 22_000}
+        budgets = {"coding-max": 18_000, "coding-untangle": 15_000, "coding-pipeline": 22_000}
+        suite_total = 0
         for name, budget in budgets.items():
             total = sum(path.stat().st_size for path in (ROOT / name).rglob("*") if path.is_file())
+            suite_total += total
             self.assertLessEqual(total, budget, f"{name} size {total} exceeds {budget}")
+        self.assertLessEqual(suite_total, 50_000, f"runtime suite size {suite_total} exceeds 50 KiB budget")
         self.assertLessEqual(
             (ROOT / "coding-max" / "SKILL.md").stat().st_size,
             4_096,
             "coding-max/SKILL.md exceeds 4 KiB; move details into conditional resources",
+        )
+        self.assertLessEqual(
+            (ROOT / "coding-untangle" / "SKILL.md").stat().st_size,
+            3_072,
+            "coding-untangle/SKILL.md exceeds 3 KiB; move details into conditional resources",
         )
 
     def test_installer_requires_explicit_destination(self) -> None:
@@ -154,6 +180,8 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn('dirname "$SKILLS_DIR"', shell)
         self.assertIn("New-Item", powershell)
         self.assertIn("mkdir -p", shell)
+        self.assertIn('"coding-untangle"', powershell)
+        self.assertIn("coding-untangle", shell)
 
 
 if __name__ == "__main__":

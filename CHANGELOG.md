@@ -1,6 +1,21 @@
 # Changelog
 
-> A new Beta release line starts at `v0.1.3beta`. Existing `v1.0.0`, `v1.0.2`, and `v2.0.0` tags remain immutable early-history snapshots.
+> The focused maintenance-suite line continues at `v0.0.3beta`. Existing historical tags remain immutable snapshots.
+
+## [0.0.3beta] - 2026-07-15
+
+### coding-untangle
+
+- Added a third, independently discoverable Skill for proven structural coupling in existing codebases.
+- Added conditional workflows for coupling audits, behavior-preserving incremental migration, and architecture fitness rules.
+- Reused coding-max Bug/Review records instead of creating a competing architecture-memory system.
+- Kept the runtime package under 15 KiB with a 3 KiB `SKILL.md` ceiling and no vendor/Agent metadata.
+
+### Maintenance-suite integration
+
+- Kept `coding-max` responsible for the originating Bug, final symptom verification, and Review closure.
+- Limited `coding-pipeline` to implementing already-defined architecture tests, lint, or CI gates.
+- Added three-way routing contracts, installer support, and a coupled-code evaluation fixture.
 
 ## [0.1.3beta] - 2026-07-15
 

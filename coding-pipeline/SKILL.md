@@ -20,6 +20,7 @@ description: Bootstrap or repair test infrastructure, CI, coverage baselines, an
 - **GitHub Actions**：再读 `references/github-actions-ci-template.yml`。
 - **GitLab CI**：再读 `references/gitlab-ci-template.yml`。
 - **其他平台/语言**：再读 `references/universal-ci-template.yml`。
+- **架构门禁**：仅在 `../coding-untangle/SKILL.md` 已给出可执行边界时，实现最小测试/lint/CI gate；不得自行决定架构。
 
 不要同时加载无关语言或 CI 平台 reference。
 
@@ -41,3 +42,4 @@ description: Bootstrap or repair test infrastructure, CI, coverage baselines, an
 - GitLab CI：`references/gitlab-ci-template.yml`
 - 其他平台：`references/universal-ci-template.yml`
 - Bug/TDD：`../coding-max/SKILL.md`
+- 耦合边界与疫苗定义：`../coding-untangle/SKILL.md`

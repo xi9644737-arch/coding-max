@@ -17,6 +17,8 @@ description: Diagnose and repair software defects, trace root causes, handle hot
 
 “修复后终审”走 Quick/Standard→Review；实现已完成直接 Review。范围外旧问题只记风险，除非用户授权扩大。
 
+确认根因属于循环依赖、跨层职责、共享状态、重复契约或变更耦合时，保持原 Bug 活动，按需读取 `../coding-untangle/SKILL.md`；结构修复完成后返回 Review，由 coding-max 验证并关闭原问题。
+
 ## 任务边界
 
 任务根优先级：用户明确目录 > 最近 manifest/config > Git 根；不得污染无关父仓库。统一写任务根 `.project-memory/`。从 `memory-template/` 初始化缺项，不覆盖旧内容。仓库指令要求沉淀即视为授权，否则首次创建前询问；显式只读时只在回复中按同结构交付。
@@ -40,4 +42,5 @@ RED 先于 GREEN；异常须处理/传播/记录上下文；日志、报错和 I
 - Review/Premortem/架构信号：`references/patch-signals.md`
 - 病历/Review/PHASE/恢复格式：`references/bug-memory-format.md`
 - 初始化：`memory-template/`
+- 结构性耦合与安全解耦：`../coding-untangle/SKILL.md`
 - 测试荒漠：`../coding-pipeline/SKILL.md`

@@ -1,0 +1,1 @@
+"""Intentionally coupled evaluation fixture."""

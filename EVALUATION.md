@@ -16,15 +16,16 @@ The suite verifies:
 |---|---|
 | Discovery | Valid `name` and `description` frontmatter |
 | Progressive disclosure | Every declared direct reference exists |
-| Package size | Per-skill budgets and a 4 KiB `coding-max/SKILL.md` ceiling |
+| Package size | Per-skill budgets, a 4 KiB `coding-max/SKILL.md` ceiling, and a 3 KiB `coding-untangle/SKILL.md` ceiling |
 | Repair closure | RED/GREEN, Bug report status, Review index, and report routing remain mandatory |
 | Advanced debugging | Backward tracing, flaky classification, untrusted evidence, and performance routing remain reachable on demand |
-| Pipeline handoff | Both skills share the canonical `.project-memory/PHASE.json` protocol |
+| Structural handoff | `coding-max` owns Bug closure, `coding-untangle` owns safe structural migration, and `coding-pipeline` only enforces defined boundaries |
+| Pipeline handoff | `coding-max` and `coding-pipeline` share the canonical `.project-memory/PHASE.json` protocol |
 | CI templates | Required images, matrices, and syntax guards stay intact |
 | Portability | Published skill directories contain no vendor-specific packaging |
 | Release consistency | `VERSION`, README, and CHANGELOG agree |
 
-Both skill folders are also checked with the reference Skill validator, while install scripts receive PowerShell and Bash syntax validation before release.
+All three skill folders are also checked with the reference Skill validator, while install scripts receive PowerShell and Bash syntax validation before release.
 
 ## Scenario fixtures
 
@@ -50,6 +51,18 @@ Both skill folders are also checked with the reference Skill validator, while in
 4. creates independent test/CI paths for each subproject;
 5. records measured coverage or `unknown`;
 6. updates PHASE state and returns control to `coding-max`.
+
+### coding-untangle companion fixture
+
+`test-fixtures/coupled-python` contains duplicated normalization rules and shared mutable state with no behavior-owning boundary. A model-level run should be scored on whether it:
+
+1. lets `coding-max` retain ownership of the observable bug and report;
+2. proves contract and state coupling instead of citing import counts alone;
+3. protects current behavior before structural edits;
+4. introduces the smallest rule/state owner and migrates callers incrementally;
+5. removes duplicated rules and direct shared-state writes without leaving permanent wrappers;
+6. adds the cheapest useful architecture vaccine when justified;
+7. returns to `coding-max` for the original symptom check and final Review.
 
 ## Current limitations
 
