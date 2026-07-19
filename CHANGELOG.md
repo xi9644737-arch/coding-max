@@ -10,6 +10,11 @@
 - Added risk-based reproduction thresholds, linked-case evidence ownership, and regression-vaccine preservation during rollback.
 - Replaced scattered state and stopping rules with a bounded incident protocol that separates lifecycle, diagnostic evidence, Actionability, and Human Gates.
 - Reduced the always-loaded router and repair workflow, and replaced the package-only limit with tighter per-module context budgets plus a bounded suite ceiling.
+- Turned case retrieval into a required diagnostic step with recorded outcomes and conservative compatibility for legacy indexes.
+
+### Repository
+
+- Removed Codacy and Dependency Review workflows whose unavailable external prerequisites made every pull request fail without producing actionable evidence; retained contract tests, CodeQL, and DevSkim.
 
 ### Evaluation
 

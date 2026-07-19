@@ -20,6 +20,7 @@ The suite verifies:
 | Repair closure | RED/GREEN, Bug report status, Review index, and report routing remain mandatory |
 | Advanced debugging | Backward tracing, flaky classification, untrusted evidence, and performance routing remain reachable on demand |
 | Incident runtime | Diagnostic stages, Actionability/Human Gates, context budgets, and lifecycle separation remain machine-checkable |
+| Case reuse | Retrieval runs before localization, records matched/no-match/unavailable outcomes, and can shortlist legacy indexes without treating history as causal proof |
 | Structural handoff | `coding-max` owns Bug closure, `coding-untangle` owns safe structural migration, and `coding-pipeline` only enforces defined boundaries |
 | Retirement handoff | `coding-tombstone` owns evidence-backed retirement and Tombstone state, then returns final Review to `coding-max` |
 | Pipeline handoff | `coding-max` and `coding-pipeline` share the canonical `.project-memory/PHASE.json` protocol |

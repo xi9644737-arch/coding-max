@@ -224,6 +224,19 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("`localized`", retrieval)
         self.assertIn("`cause-confirmed`", retrieval)
 
+    def test_memory_retrieval_is_an_executed_feedback_loop(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        retrieval = read("coding-max/references/memory-retrieval.md")
+        for contract in ("failure-confirmed", "localized", "必须执行一次历史匹配"):
+            self.assertIn(contract, skill)
+        self.assertIn("无 `BUG_PATTERNS.md` 写 `unavailable`", skill)
+        for field in ("history_retrieval", "status", "patterns", "cases", "hypotheses", "checks"):
+            self.assertIn(field, memory_format)
+        for compatibility in ("旧索引", "症状摘要", "标签交集", "不得据此合并模式"):
+            self.assertIn(compatibility, retrieval)
+        self.assertIn("matched | no-match | unavailable", retrieval)
+
     def test_runtime_kernel_and_protocols_have_bounded_context(self) -> None:
         limits = {
             "coding-max/SKILL.md": 3_200,

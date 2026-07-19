@@ -35,6 +35,12 @@ signature:
   origin_contract: null
   symptom_fingerprint: null
   environment: null
+history_retrieval:
+  status: pending | matched | no-match | unavailable
+  patterns: []
+  cases: []
+  hypotheses: []
+  checks: []
 stage_evidence: []
 reported: YYYY-MM-DD
 resolved: null
@@ -83,7 +89,7 @@ tags: []
 - 下次优先检查：
 ```
 
-`stage_evidence` 每项写 `{stage, evidence}`；证据必须是可复核的命令、断言、路径或观测结果。未知字段保留 `null`，随当前事件证据补齐，不得从历史病例复制为事实。
+`stage_evidence` 写 `{stage, evidence}`；证据须可复核。未知字段保留 `null`，随当前证据补齐，不得从历史复制为事实。`history_retrieval` 只记录实际检索、假设和待验证检查。
 
 ## 交叉不变量
 
