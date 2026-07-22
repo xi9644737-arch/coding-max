@@ -3,7 +3,7 @@
 > Vendor-neutral Skills for root-cause repair, safe untangling, trustworthy verification, and evidence-backed retirement.
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.4beta-orange">
+  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.5beta-orange">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Skills" src="https://img.shields.io/badge/skills-4-brightgreen">
   <a href="https://skills.sh/xi9644737-arch/coding-max"><img alt="skills.sh installs" src="https://skills.sh/b/xi9644737-arch/coding-max"></a>

@@ -1,8 +1,10 @@
 # Changelog
 
-> The focused maintenance-suite line continues at `v0.0.4beta`. Existing historical tags remain immutable snapshots.
+> The focused maintenance-suite line continues at `v0.0.5beta`. Existing historical tags remain immutable snapshots.
 
 ## Unreleased
+
+## [0.0.5beta] - 2026-07-22
 
 ### coding-max
 

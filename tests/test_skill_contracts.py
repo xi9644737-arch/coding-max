@@ -60,7 +60,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_public_version_is_consistent(self) -> None:
         version = read("VERSION").strip()
-        self.assertEqual(version, "0.0.4beta")
+        self.assertEqual(version, "0.0.5beta")
         self.assertIn(f"v{version}", read("README.md"))
         self.assertIn(f"[{version}]", read("CHANGELOG.md"))
         self.assertIn("npx skills add xi9644737-arch/coding-max", read("README.md"))
