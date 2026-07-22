@@ -1,13 +1,26 @@
 # Changelog
 
-> The focused maintenance-suite line continues at `v0.0.4beta`. Existing historical tags remain immutable snapshots.
+> The focused maintenance-suite line continues at `v0.0.5beta`. Existing historical tags remain immutable snapshots.
 
 ## Unreleased
+
+## [0.0.5beta] - 2026-07-22
 
 ### coding-max
 
 - Classified product RED, contract build gates, and harness failures so weaker models cannot merge unlike evidence.
 - Added risk-based reproduction thresholds, linked-case evidence ownership, and regression-vaccine preservation during rollback.
+- Replaced scattered state and stopping rules with a bounded incident protocol that separates lifecycle, diagnostic evidence, Actionability, and Human Gates.
+- Reduced the always-loaded router and repair workflow, and replaced the package-only limit with tighter per-module context budgets plus a bounded suite ceiling.
+- Turned case retrieval into a required diagnostic step with recorded outcomes and conservative compatibility for legacy indexes.
+
+### Repository
+
+- Removed Codacy and Dependency Review workflows whose unavailable external prerequisites made every pull request fail without producing actionable evidence; retained contract tests, CodeQL, and DevSkim.
+
+### Evaluation
+
+- Added three external adversarial cases with allowlisted public bundles, evaluator-only ground truth, host-captured check manifests, fatal integrity failures, and weighted behavioral metrics.
 
 ## [0.0.4beta] - 2026-07-15
 

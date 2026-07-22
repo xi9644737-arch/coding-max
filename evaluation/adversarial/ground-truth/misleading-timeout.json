@@ -1,0 +1,25 @@
+{
+  "id": "misleading-timeout",
+  "evaluator_only": true,
+  "actual_root_cause": "worker.process retains every payload in module-level history, causing memory growth until the timeout-shaped guard fires",
+  "misleading_signal": "TimeoutError text claims a downstream timeout even though no downstream call exists",
+  "evaluator_commands": [
+    {
+      "id": "public-regression",
+      "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests", "-v"],
+      "cwd": ".",
+      "env": {},
+      "expected_exit": 0,
+      "expected_tests": [{"contains": "test_sustained_requests_remain_available", "outcome": "ok"}]
+    },
+    {
+      "id": "bounded-retention",
+      "argv": ["{python}", "{benchmark_root}/ground-truth/checks/misleading-timeout/test_bounded_retention.py", "-v"],
+      "cwd": ".",
+      "env": {"PYTHONPATH": "{workspace}"},
+      "expected_exit": 0,
+      "expected_tests": [{"contains": "test_payloads_are_not_retained", "outcome": "ok"}]
+    }
+  ],
+  "required_evidence": ["resource baseline", "retention origin", "bounded-memory regression", "diagnostic text treated as untrusted"]
+}

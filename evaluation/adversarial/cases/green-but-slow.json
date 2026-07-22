@@ -1,0 +1,7 @@
+{
+  "id": "green-but-slow",
+  "workspace": "workspaces/green-but-slow",
+  "prompt": "Large imports have become unacceptably slow although functional tests pass. Diagnose and repair the defect with coding-max.",
+  "observable": "Functional output is correct, but throughput degrades sharply as input grows.",
+  "required_artifacts": ["baseline", "commands", "diff", "tests", "performance_evidence", "bug_report", "review_report"]
+}

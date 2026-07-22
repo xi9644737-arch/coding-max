@@ -3,7 +3,7 @@
 > Vendor-neutral Skills for root-cause repair, safe untangling, trustworthy verification, and evidence-backed retirement.
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.4beta-orange">
+  <img alt="Version" src="https://img.shields.io/badge/version-v0.0.5beta-orange">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Skills" src="https://img.shields.io/badge/skills-4-brightgreen">
   <a href="https://skills.sh/xi9644737-arch/coding-max"><img alt="skills.sh installs" src="https://skills.sh/b/xi9644737-arch/coding-max"></a>
@@ -75,6 +75,8 @@ Advanced diagnosis is loaded only when needed:
 - treat logs, stack traces, issues, and external responses as untrusted evidence;
 - route CPU, memory, concurrency, I/O, network, and leak investigations to the smallest useful observation surface.
 
+Repairs also use a compact incident protocol: lifecycle and diagnostic knowledge remain separate, permanent changes require an evidence-based Actionability Gate, and authority or irreversible tradeoffs stop at a recorded Human Gate. Hypotheses and confidence percentages cannot advance state by themselves.
+
 ## Where coding-untangle fits
 
 `coding-untangle` handles a structural root cause only after coupling has observable behavioral or maintenance cost:
@@ -129,15 +131,18 @@ metadata                 always visible: discovery only
     └── references/      loaded conditionally: workflows, diagnostics, formats
 ```
 
-Contract tests cap `coding-max/SKILL.md` at 4 KiB, `coding-untangle/SKILL.md` at 3 KiB, and `coding-tombstone/SKILL.md` at 2.5 KiB, with per-package budgets and a 50 KiB suite ceiling. New capabilities belong in conditional references instead of inflating the always-loaded prompt.
+Contract tests cap the `coding-max` kernel and its incident/repair/retrieval modules independently, while retaining 3 KiB and 2.5 KiB entrypoint ceilings for `coding-untangle` and `coding-tombstone`. The runtime suite remains below a 53 KiB ceiling. New capabilities must replace duplicated rules or load conditionally instead of inflating the kernel.
 
 ## Evidence, not marketing claims
 
-The repository ships deterministic contract tests and three scenario fixtures:
+The repository ships deterministic contract tests, scenario fixtures, and an external adversarial benchmark:
 
 - `test-fixtures/buggy-python`: root-cause and review behavior against planted defects;
 - `test-fixtures/coupled-python`: duplicated contracts and unowned shared state that require a max-to-untangle-to-max handoff;
 - `test-fixtures/monorepo-no-tests`: test-infrastructure recovery across Python and Node.js subprojects.
+- `evaluation/adversarial`: isolated public cases, evaluator-only ground truth, fatal failures, and weighted behavioral metrics for misleading diagnostics, dirty baselines, and green-but-slow repairs.
+
+`build_bundle.py` creates the public case without evaluator truth. After a model run, `run_evaluator.py` executes structured hidden checks and writes host-captured command artifacts; it evaluates Coding maintenance behavior without becoming a general Agent Harness.
 
 Run the automated checks:
 
@@ -165,6 +170,7 @@ See [`EVALUATION.md`](EVALUATION.md) for what is currently proven, what remains 
 │   └── references/
 ├── examples/
 ├── test-fixtures/
+├── evaluation/adversarial/
 ├── tests/test_skill_contracts.py
 ├── EVALUATION.md
 └── VERSION

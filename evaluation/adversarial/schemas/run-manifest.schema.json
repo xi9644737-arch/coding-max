@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Adversarial evaluation host-captured run manifest",
+  "type": "object",
+  "required": ["schema_version", "case_id", "provenance", "workspace_snapshots", "commands", "passed"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "case_id": {"type": "string"},
+    "provenance": {
+      "type": "object",
+      "required": ["captured_by", "capture_method", "started_at", "finished_at"],
+      "properties": {
+        "captured_by": {"const": "evaluator"},
+        "capture_method": {"const": "subprocess"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "finished_at": {"type": "string", "format": "date-time"},
+        "repository_commit": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "workspace_snapshots": {
+      "type": "object",
+      "required": ["before_evaluation", "after_evaluation"],
+      "properties": {
+        "before_evaluation": {"type": "string"},
+        "after_evaluation": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact_id", "argv", "cwd", "env", "exit_code", "expected_exit", "stdout", "stderr", "output_sha256", "expected_tests", "expectations_met"],
+        "properties": {
+          "artifact_id": {"type": "string"},
+          "argv": {"type": "array", "items": {"type": "string"}},
+          "cwd": {"type": "string"},
+          "env": {"type": "object", "additionalProperties": {"type": "string"}},
+          "exit_code": {"type": "integer"},
+          "expected_exit": {"type": "integer"},
+          "stdout": {"type": "string"},
+          "stderr": {"type": "string"},
+          "output_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "expected_tests": {"type": "array"},
+          "expectations_met": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "passed": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

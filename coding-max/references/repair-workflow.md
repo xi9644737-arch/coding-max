@@ -1,31 +1,25 @@
 # 诊断与修复流程
 
-仅在 Explore 或实际修复时读取。Explore 执行步骤 1–2 后输出诊断，不写文件；其他模式继续全部步骤。
+Explore 只调查并输出；修复执行全部步骤。状态、风险和交权由 `incident-protocol.md` 定义。
 
-## 1. 建档与复现
+## 1. 观察与定位
 
-先取得最小复现。修改前建 `investigating` Bug 报告；Hotfix 可后补。记录任务根、dirty baseline 和既有失败。读取报错、入口、调用链、配置和测试，检索 `BUG_PATTERNS.md`；历史只能生成假设。
+记录任务根、dirty baseline、既有失败和最小复现；修改前建 `investigating` 病历（Hotfix 可后补）。读入口、调用链、配置和测试；按症状/组件/根因标签检索 `BUG_PATTERNS.md`，历史只能生成假设。
 
-## 2. 根因与影响面
+列最多三个可证伪假设，从失败点追到首次破坏契约处并扫描相邻模式。跨层污染、偶现或性能/资源故障读 `advanced-debugging.md` 的匹配分支，不要加载无关工具。必要时加 2–4 个 `[BUG-TRACE]`，复现后删除。
 
-至少两层 Why；列最多三个可证伪假设并验证，扫描相邻同模式。并发、时序、状态机或假设全错时加 2–4 个 `[BUG-TRACE]`，复现后删除。
+核对调用方、数据/错误格式、配置和外部接口，检查三个边界（含非 happy path）。Standard 永久修改前读 `patch-signals.md` 做 Premortem。Actionability 通过且无待决 Human Gate 才能永久修改。
 
-坏值跨层传播、无法稳定复现或属于性能/资源故障时，读取 `advanced-debugging.md`，选择一个匹配策略；不要加载无关工具。
+## 2. RED / GREEN
 
-搜索调用方、数据/错误格式、配置和外部接口；检查至少三个边界（含非 happy path）。跨 3+ 模块、迁移或不可逆状态升 Standard。仅在契约/方案选择会改变结果时等待确认。
+证据分级：**产品 RED** 失败在目标产品断言；**合同构建门**（import/collection/compile/schema）只证明能力表面缺失；**harness failure**（barrier、timeout、fixture、清理、钩子）先修测试设施。只把改变方向的被拒证据写入胶囊。
 
-## 3. TDD
+并发、时序、偶发或资源边界须连续三次同型产品断言失败；普通确定性缺陷不机械三跑，复跑一次即可。无法稳定复现则用协议认可的采样/不变量证据，永久修复前仍须取得失败的回归疫苗。然后最小 GREEN；不能自动化则记录命令、输入、预期和实际。Hotfix 可先做预授权可逆 mitigation，但病历保持活动；架构根因只止血并标 `arch-*`，除非获准重构。
 
-先分级证据：**产品 RED** 失败在目标产品断言；**合同构建门**（import/collection/compile/schema 缺口）只证明表面不存在，不冒充运行时行为；**harness failure**（barrier、timeout、fixture、清理或钩子）先修测试设施。只把改变方向的被拒证据写入胶囊“弯路”，不记普通命令错误。
+## 3. 验证与关闭
 
-并发、时序、偶发、资源边界或用户指定门槛须连续三次同型产品断言失败；普通确定性缺陷不机械三跑，复跑一次确认可重复即可。然后最小 GREEN、REFACTOR；不能自动化时记录命令、输入、预期和实际。架构根因只止血并标 `arch-*`，除非获准重构。
+按真实契约检查异常、默认值、资源、并发、调用方和无关改动；运行复现、相关测试及允许的全量检查，条件/边界 Bug 做定向变异或反事实。
 
-## 4. 自审与验证
+仅满足 incident protocol 的 `regression-proven` 可判 resolved；无关基线失败只列出。仅新失败或同一未解假设计 strike，三次写恢复点并停止。无测试且风险不低时调用 `coding-pipeline`。
 
-按真实契约检查异常、边界、默认值、资源、并发和无关改动；细则见 `patch-signals.md`。运行复现、相关测试和允许的全量检查；条件/边界 Bug 做一次定向变异。
-
-目标及相关测试通过可判 resolved；全量若只被已记录的无关基线失败阻断，列出但不计 strike。仅本修复引入的新失败或同一未解假设计 strike；三次写恢复点并停止。无可执行测试且风险不低时调用 `coding-pipeline`。
-
-## 5. 关闭
-
-按 `bug-memory-format.md` 补全症状、复现、根因、修复、影响、验证、回滚、闭环和胶囊；写 `resolved|blocked`，不得遗留虚假 `investigating`；更新或合并 `BUG_PATTERNS.md`。删除 trace、临时物和已完成恢复点。
+按病历格式补全根因、修复、验证、回滚、回归疫苗和胶囊；关闭状态，更新/合并 `BUG_PATTERNS.md`，删除诊断残留。

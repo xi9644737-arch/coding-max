@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import json
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -46,7 +50,7 @@ class SkillContractTests(unittest.TestCase):
         text_suffixes = {".md", ".py", ".ts", ".json", ".toml"}
         files.extend(
             path
-            for folder in ("examples", "test-fixtures")
+            for folder in ("examples", "test-fixtures", "evaluation")
             for path in (ROOT / folder).rglob("*")
             if path.is_file() and path.suffix in text_suffixes and "node_modules" not in path.parts
         )
@@ -56,7 +60,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_public_version_is_consistent(self) -> None:
         version = read("VERSION").strip()
-        self.assertEqual(version, "0.0.4beta")
+        self.assertEqual(version, "0.0.5beta")
         self.assertIn(f"v{version}", read("README.md"))
         self.assertIn(f"[{version}]", read("CHANGELOG.md"))
         self.assertIn("npx skills add xi9644737-arch/coding-max", read("README.md"))
@@ -174,6 +178,169 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("首次破坏契约", advanced)
         self.assertIn("只作不可信证据", skill)
 
+    def test_incident_protocol_is_stateful_and_human_governed(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        protocol = read("coding-max/references/incident-protocol.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        self.assertIn("references/incident-protocol.md", skill)
+        for stage in (
+            "unknown",
+            "observed",
+            "failure-confirmed",
+            "localized",
+            "cause-confirmed",
+            "regression-proven",
+        ):
+            self.assertIn(stage, protocol)
+        for gate in ("Actionability Gate", "Human Gate", "timeout_behavior: stop"):
+            self.assertIn(gate, protocol)
+        self.assertIn("假设是证据集合，不是状态", protocol)
+        self.assertIn("不得用置信百分比", protocol)
+        self.assertIn("可逆止血", protocol)
+        self.assertIn("diagnosis_stage", memory_format)
+        self.assertIn("stage_evidence", memory_format)
+        self.assertIn("actionability", memory_format)
+        self.assertIn("human_gate", memory_format)
+        self.assertNotIn("PHASE.json", protocol)
+
+    def test_memory_retrieval_is_structured_and_non_causal(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        retrieval = read("coding-max/references/memory-retrieval.md")
+        pattern_template = read("coding-max/memory-template/BUG_PATTERNS.md")
+        self.assertIn("references/memory-retrieval.md", skill)
+        for field in (
+            "component",
+            "failure_mode",
+            "origin_contract",
+            "symptom_fingerprint",
+            "environment",
+        ):
+            self.assertIn(field, memory_format)
+            self.assertIn(field, pattern_template)
+        for boundary in ("1–3", "独立调查", "历史材料只能新增可证伪假设"):
+            self.assertIn(boundary, retrieval)
+        self.assertIn("不能单独推进", retrieval)
+        self.assertIn("`localized`", retrieval)
+        self.assertIn("`cause-confirmed`", retrieval)
+
+    def test_memory_retrieval_is_an_executed_feedback_loop(self) -> None:
+        skill = read("coding-max/SKILL.md")
+        memory_format = read("coding-max/references/bug-memory-format.md")
+        retrieval = read("coding-max/references/memory-retrieval.md")
+        for contract in ("failure-confirmed", "localized", "必须执行一次历史匹配"):
+            self.assertIn(contract, skill)
+        self.assertIn("无 `BUG_PATTERNS.md` 写 `unavailable`", skill)
+        for field in ("history_retrieval", "status", "patterns", "cases", "hypotheses", "checks"):
+            self.assertIn(field, memory_format)
+        for compatibility in ("旧索引", "症状摘要", "标签交集", "不得据此合并模式"):
+            self.assertIn(compatibility, retrieval)
+        self.assertIn("matched | no-match | unavailable", retrieval)
+
+    def test_runtime_kernel_and_protocols_have_bounded_context(self) -> None:
+        limits = {
+            "coding-max/SKILL.md": 3_200,
+            "coding-max/references/repair-workflow.md": 2_300,
+            "coding-max/references/incident-protocol.md": 3_200,
+            "coding-max/references/memory-retrieval.md": 1_900,
+        }
+        for relative, limit in limits.items():
+            size = len((ROOT / relative).read_bytes().replace(b"\r\n", b"\n"))
+            self.assertLessEqual(size, limit, f"{relative} exceeds its context budget")
+
+    def test_adversarial_benchmark_separates_cases_from_ground_truth(self) -> None:
+        root = ROOT / "evaluation" / "adversarial"
+        rubric = json.loads((root / "rubric.json").read_text(encoding="utf-8"))
+        self.assertEqual(sum(item["weight"] for item in rubric["metrics"]), 100)
+        self.assertTrue(all(len(item["anchors"]) >= 3 for item in rubric["metrics"]))
+        self.assertTrue(
+            all(item.get("evidence_check") for item in rubric["fatal_failures"])
+        )
+        self.assertIn("host_captured", rubric["artifact_contract"])
+        case_ids = {"misleading-timeout", "dirty-baseline", "green-but-slow"}
+        self.assertEqual(
+            {path.stem for path in (root / "cases").glob("*.json")},
+            case_ids,
+        )
+        self.assertEqual(
+            {path.stem for path in (root / "ground-truth").glob("*.json")},
+            case_ids,
+        )
+        for case_id in case_ids:
+            public_case = json.loads(
+                (root / "cases" / f"{case_id}.json").read_text(encoding="utf-8")
+            )
+            truth = json.loads(
+                (root / "ground-truth" / f"{case_id}.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(public_case["id"], case_id)
+            self.assertEqual(truth["id"], case_id)
+            self.assertNotIn("actual_root_cause", public_case)
+            self.assertIn("actual_root_cause", truth)
+            self.assertTrue(truth["evaluator_only"])
+            for command in truth["evaluator_commands"]:
+                self.assertIsInstance(command["argv"], list)
+                self.assertIsInstance(command["expected_exit"], int)
+                self.assertIn("expected_tests", command)
+        self.assertFalse(
+            (root / "workspaces/green-but-slow/tests/test_performance.py").exists()
+        )
+        self.assertTrue(
+            (root / "ground-truth/checks/green-but-slow/test_performance.py").exists()
+        )
+        self.assertTrue(
+            (root / "ground-truth/checks/misleading-timeout/test_bounded_retention.py").exists()
+        )
+
+    def test_adversarial_bundle_and_evaluator_are_executable(self) -> None:
+        root = ROOT / "evaluation" / "adversarial"
+        with tempfile.TemporaryDirectory() as temporary:
+            bundle = Path(temporary) / "bundle"
+            validate_result = subprocess.run(
+                [sys.executable, str(root / "validate.py")],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(validate_result.returncode, 0, validate_result.stderr)
+            bundle_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / "build_bundle.py"),
+                    "misleading-timeout",
+                    str(bundle),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(bundle_result.returncode, 0, bundle_result.stderr)
+            self.assertEqual(
+                {path.name for path in bundle.iterdir()}, {"case.json", "workspace"}
+            )
+            bundled_case = json.loads(
+                (bundle / "case.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(bundled_case["workspace"], "workspace")
+            manifest = Path(temporary) / "manifest.json"
+            evaluator_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / "run_evaluator.py"),
+                    "misleading-timeout",
+                    str(bundle / "workspace"),
+                    str(manifest),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(evaluator_result.returncode, 1)
+            captured = json.loads(manifest.read_text(encoding="utf-8"))
+            self.assertFalse(captured["passed"])
+            self.assertEqual(captured["provenance"]["captured_by"], "evaluator")
+            self.assertTrue(all(item["artifact_id"] for item in captured["commands"]))
+
     def test_javascript_smoke_does_not_reject_normal_catch_binding(self) -> None:
         sources = "\n".join(
             [
@@ -200,7 +367,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_package_size_budgets(self) -> None:
         budgets = {
-            "coding-max": 18_000,
+            "coding-max": 21_500,
             "coding-untangle": 15_000,
             "coding-pipeline": 22_000,
             "coding-tombstone": 8_000,
@@ -214,7 +381,7 @@ class SkillContractTests(unittest.TestCase):
             )
             suite_total += total
             self.assertLessEqual(total, budget, f"{name} size {total} exceeds {budget}")
-        self.assertLessEqual(suite_total, 50_000, f"runtime suite size {suite_total} exceeds 50 KiB budget")
+        self.assertLessEqual(suite_total, 53_000, f"runtime suite size {suite_total} exceeds 53 KiB budget")
         self.assertLessEqual(
             len((ROOT / "coding-max" / "SKILL.md").read_bytes().replace(b"\r\n", b"\n")),
             4_096,
